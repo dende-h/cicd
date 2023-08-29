@@ -1,0 +1,99 @@
+TeratarmでEC2にSSH接続
+
+システムを最新にアップデート
+sudo yum update -y
+
+Rubyをビルドするための必要なパッケージのインストール
+sudo yum install -y git gcc-c++ make openssl-devel zlib-devel readline-devel
+
+Rubyのバージョン管理ツールrbenvをインストール(複数のRubyバージョンを簡単にインストール・切替ができる)
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+cabacho 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
+source ~/.bash_profile
+
+ruby-buildのインストール
+rbenvのプラグインでRubyのバージョンを簡単にインストールするためのもの
+git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+
+Ruby3.1.2をインストール
+rbenv install 3.1.2
+rbenv global 3.1.2
+
+インストールの確認
+ruby -v
+
+表示された内容
+ruby 3.1.2p20 (2022-04-12 revision 4491bb740a) [x86_64-linux]
+
+Bundlerのインストールを実行
+gem install bundler
+
+
+
+ここまで20230828
+
+サンプルアプリの./config配下にapplication.yml
+を作成して、その中にMySQLのパスワード環境変数を設定
+
+touch application.yml
+vi application.yml
+iで編集モード
+Espを押して:wqで保存して終了
+
+サンプルアプリの./config/environments配下のdevelopment.rb内のconfig.hostsをEC2のホスト名に変更
+
+nvmのインストール
+node.jsのバージョン管理ツール
+git clone https://github.com/creationix/nvm.git ~/.nvm
+
+echo 'export NVM_DIR="$HOME/.nvm" ' >> ~/.bashrc
+echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' >> ~/.bashrc
+echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DI
+R/bash_completion" ' >> ~/.bashrc
+source ~/.bashrc
+
+Node.jsとyarnのインストール
+nvm install v16.20.2
+npm install -g yarn
+
+application.ymlの間違いを修正
+database.yml作成
+database.ymlの修正
+
+defaultの設定を上書きされていた
+soketはlocal環境のMySQLに使用する
+
+mysqlクライアントの確認
+yum list installed | grep mysql
+mariadbアンインストール
+yum list installed | grep mariadbで確認
+sudo yum remove mariadb-libsで消去
+インストール
+sudo yum install mysql-devel
+(一回したはずなのに、クライアント見つかりませんエラーがでる。もう一回インストールしなおしたらエラーは解消した)
+
+bin/setup
+
+pumaでサーバー立ち上げる
+アクセスしてもこのサイトは接続できません
+EC2のセキュリティグループでポート3000を許可
+rails s -p 3000 -b 0.0.0.0でサーバーを立ち上げ
+http://<インスタンスのpublicIP>:3000にアクセス
+
+エラー
+The asset "〜" is not present in the asset pipeline.
+
+rake tmp:cache:clearでキャッシュのクリア、rake assets:precompileで再コンパイルしたところエラーの解消
+
+アプリの配置ディレクトリを変える
+ディレクトリ作成
+/var/www ディレクトリは、Web サーバーでホストされる Web コンテンツを保存するための標準的なディレクトリです。多くの Linux ディストリビューションや Web サーバーソフトウェア（Apache, Nginx など）では、このディレクトリがデフォルトの Web ルートとして使用される。
+sudo mkdir -p /var/www
+sudo chmod -R 755 /var/www
+sudo chown -R ec2-user:ec2-user /var/www
+
+
+上記ディレクトリにアプリを移動
+mv ./raisetech-live8-sample-app/ /var/www/
+cd /var/www
