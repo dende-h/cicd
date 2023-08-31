@@ -8,7 +8,7 @@ sudo yum install -y git gcc-c++ make openssl-devel zlib-devel readline-devel
 
 Rubyのバージョン管理ツールrbenvをインストール(複数のRubyバージョンを簡単にインストール・切替ができる)
 git clone https://github.com/rbenv/rbenv.git ~/.rbenv
-cabacho 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
 echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
 source ~/.bash_profile
 
@@ -72,6 +72,7 @@ sudo yum remove mariadb-libsで消去
 インストール
 sudo yum install mysql-devel
 (一回したはずなのに、クライアント見つかりませんエラーがでる。もう一回インストールしなおしたらエラーは解消した)
+
 
 bin/setup
 
