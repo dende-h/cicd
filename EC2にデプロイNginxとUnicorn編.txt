@@ -100,3 +100,18 @@ sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
 パッケージの改ざんを防ぐために必要なGPG鍵が最近変更されたのが原因
 
 再度bandle installを実行したら成功
+
+Nginxのインストール
+sudo yum install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm -y
+sudo yum install nginx -y
+
+接続確認
+sudo systemctl status nginx.service
+
+sudo systemctl start nginx.service
+
+sudo systemctl status nginx.service
+
+EC2のセキュリティでHTTPを許可し、EC2のIP：80に接続して確認
+
+sudo systemctl stop nginx.service
