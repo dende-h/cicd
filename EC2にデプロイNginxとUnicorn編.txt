@@ -100,3 +100,24 @@ sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
 パッケージの改ざんを防ぐために必要なGPG鍵が最近変更されたのが原因
 
 再度bandle installを実行したら成功
+
+config/unicorn.rbを記述変更
+
+rails g task unicorn
+lib/tasks/unicorn.rakeを記述
+
+rails unicorn:start
+エラーmaster failed to start, check stderr log for details rails aborted!
+`extract_name': missing required option :name (ArgumentError)
+
+lib/tasks/unicorn.rakeを記述変更　production →　development
+
+database.ymlのhostとusername,passwordを修正
+
+アプリルートでbin/setup実行
+rails unicorn:start
+エラーが出なかったので無事起動か
+
+
+
+
