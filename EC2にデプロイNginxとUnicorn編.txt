@@ -134,6 +134,9 @@ database.ymlのhostとusername,passwordを修正
 rails unicorn:start
 エラーが出なかったので無事起動か
 
+ps aux | grep unicorn
+で起動確認
+
 rails unicorn:stopが上手く動作しない
 →pidとsockのパスが違ったため。unicorn.rbのパスを修正
 
@@ -149,3 +152,12 @@ rake tmp:cache:clearでキャッシュのクリア、rake assets:precompileで�
 
 アプリケーションのトップ画面が表示されたがスタイリングが反映されていない
 
+NginxのエラーログにArgumentError: Missing secret_key_base for 'develop' environment
+production環境でも同様のエラー
+
+application.ymlに環境変数SECRET_KEY_BASEを設定
+Keyはrake secretで出力
+
+S3の接続に関するエラーもでていたので、一旦production.rbからコメントアウトしておく
+
+bin/setupをproduction環境で実施
