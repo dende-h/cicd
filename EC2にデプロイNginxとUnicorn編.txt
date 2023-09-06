@@ -161,3 +161,8 @@ Keyはrake secretで出力
 S3の接続に関するエラーもでていたので、一旦production.rbからコメントアウトしておく
 
 bin/setupをproduction環境で実施
+成功
+NginxとUnicornをそれぞれスタート
+http:<EC2のIPアドレス>:80でアクセス
+
+今度はアプリケーションのスタイリングも当たって正常
