@@ -1,5 +1,5 @@
 EC2にデプロイNginxとUnicorn編
-
+app 名raisetech-live8-sample-app
 EC2とRDSを新たに立ち上げ(復習)
 接続確認
 
@@ -101,6 +101,22 @@ sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
 
 再度bandle installを実行したら成功
 
+Nginxのインストール
+sudo yum install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm -y
+sudo yum install nginx -y
+
+接続確認
+sudo systemctl status nginx.service
+
+sudo systemctl start nginx.service
+
+sudo systemctl status nginx.service
+
+EC2のセキュリティでHTTPを許可し、EC2のIP：80に接続して確認
+
+sudo systemctl stop nginx.service
+
+Unicornの設定
 config/unicorn.rbを記述変更
 
 rails g task unicorn
@@ -118,22 +134,18 @@ database.ymlのhostとusername,passwordを修正
 rails unicorn:start
 エラーが出なかったので無事起動か
 
+rails unicorn:stopが上手く動作しない
+→pidとsockのパスが違ったため。unicorn.rbのパスを修正
 
+cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/raisetech-live8-sample-app.conf
+でconfファイルを新たに作成し中身を修正してUnicornとの接続設定を記述
 
+http:<EC2のIPアドレス>:80でアクセス
 
+エラー
+The asset "〜" is not present in the asset pipeline.
 
+rake tmp:cache:clearでキャッシュのクリア、rake assets:precompileで再コンパイルしたところエラーの解消
 
-Nginxのインストール
-sudo yum install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm -y
-sudo yum install nginx -y
+アプリケーションのトップ画面が表示されたがスタイリングが反映されていない
 
-接続確認
-sudo systemctl status nginx.service
-
-sudo systemctl start nginx.service
-
-sudo systemctl status nginx.service
-
-EC2のセキュリティでHTTPを許可し、EC2のIP：80に接続して確認
-
-sudo systemctl stop nginx.service
