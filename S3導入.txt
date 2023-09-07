@@ -1,0 +1,22 @@
+
+S3を作成後、S3へのアクセス権限のみ持つRoleを作成してEC2にアタッチ
+S3はすべてのパブリックアクセスをブロックで作成
+S3のポリシー修正
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::584338796296:role/<role-name>"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::bucket-name/*"
+        }
+    ]
+}
+
