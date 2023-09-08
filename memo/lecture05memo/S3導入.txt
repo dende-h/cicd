@@ -1,0 +1,36 @@
+
+S3を作成後、S3へのアクセス権限のみ持つRoleを作成してEC2にアタッチ
+S3はすべてのパブリックアクセスをブロックで作成
+S3のポリシー修正
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::584338796296:role/<role-name>"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::<bucket-name>/*"
+        }
+    ]
+}
+
+storage.ymlとproduction.rbの記述を更新し、bucket名は環境変数で追加
+storage.ymlのアクセスキーとシークレットアクセスキーはコメントアウト
+
+EC2内でアプリの変更をpullしbin/setupをproduction環境で実行
+サーバーを起動しアプリを表示
+画像をアップロードが正常に動作することを確認
+
+VPCエンドポイントでS3用のGatewayを作成しルートテーブルに追加
+画像をアップロードが正常に動作することを確認
+
+EC2からbucket内の確認のため、aws-cliインストール
+sudo yum install aws-cli -y
+確認コマンド
+aws s3 ls s3://ruby-app-storage/
