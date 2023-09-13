@@ -33,3 +33,12 @@ CloudWatchでメトリクスアラームを設定したイベントが記録さ�
 
     通知メール
     ![ok](./images/lecture06/healthy_alarm_mail2023-09-13.png)
+
+### Pricing calculaterでリソース利用料の見積り作成
+[見積へのリンク](https://calculator.aws/#/estimate?id=3f1ec588a6820fa05824d3c0dca652ca63877965)
+
+### マネジメントコンソールから自分の請求の確認
+**先月の請求とEC2のコスト**
+
+![all-cost](./images/lecture06/Billing2023-09-13.png)
+![ec2-cost](./images/lecture06/EC2cost2023-09-13.png)
