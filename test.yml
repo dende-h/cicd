@@ -1,5 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
+Parameters: 
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    
+  MyIP:
+    Description: IP address allowed to access EC2
+    Type: String
+
 Resources:
   Lecture10VPC:
     Type: AWS::EC2::VPC
@@ -82,13 +91,21 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref Lecture10IGW
   
-  Lecture10PrivateSubnetRouteTable:
+  Lecture10PrivateSubnetRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref Lecture10VPC
       Tags:
         - Key: Name
-          Value: Lecture10PrivateSubnetRouteTable
+          Value: Lecture10PrivateSubnetRouteTable1
+  
+  Lecture10PrivateSubnetRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Lecture10VPC
+      Tags:
+        - Key: Name
+          Value: Lecture10PrivateSubnetRouteTable2
 
   Lecture10PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -121,14 +138,133 @@ Resources:
   Lecture10AssocciateRouteTableForPrivateSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref Lecture10PrivateSubnetRouteTable
+      RouteTableId: !Ref Lecture10PrivateSubnetRouteTable1
       SubnetId: !Ref Lecture10PrivateSubnet1
   
   Lecture10AssocciateRouteTableForPrivateSubnet2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref Lecture10PrivateSubnetRouteTable
+      RouteTableId: !Ref Lecture10PrivateSubnetRouteTable2
       SubnetId: !Ref Lecture10PrivateSubnet2
+  
+  Lecture10SecGpForEc2:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ec2-sec-lecture10
+      GroupDescription: securitey for ec2 access
+      VpcId: !Ref Lecture10VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref MyIP
+      Tags:
+        - Key: Name
+          Value: Lecture10SecGpForEc2
+  
+  Lecture10SecGpForRds:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: rds-sec-lecture10
+      GroupDescription: securitey for rds access
+      VpcId: !Ref Lecture10VPC
+      Tags:
+        - Key: Name
+          Value: Lecture10SecGpForRds
+  
+  SecurityGroupIgressForRds:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      GroupId: !Ref Lecture10SecGpForRds
+      SourceSecurityGroupId: !Ref Lecture10SecGpForEc2
+  
+  secGroupName:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      GroupId: !Ref Lecture10SecGpForRds
+      DestinationSecurityGroupId: !Ref Lecture10SecGpForEc2
+
+  Lecture10Ec2:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: !Ref KeyName 
+      DisableApiTermination: false 
+      ImageId: ami-07d6bd9a28134d3b3
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          SubnetId: !Ref Lecture10PublicSubnet1
+      InstanceType: t2.micro
+      Monitoring: false
+      SecurityGroupIds:
+        - !Ref Lecture10SecGpForEc2
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: 8
+      UserData:
+        Fn::Base64: 
+            -#!/bin/bash
+            yum update -y
+            yum install -y git
+            yum install -y mysql
+      Tags:
+        - Key: Name
+          Value: Lecture10Ec2
+  
+  # Lecture10Rds:
+  #   Type: AWS::RDS::DBInstance
+  #   Properties:
+  #     AllocatedStorage: 
+  #     DBInstanceClass: 
+  #     AllowMajorVersionUpgrade: false
+  #     AutoMinorVersionUpgrade: true
+  #     AvailabilityZone: 
+  #       Fn::Select: 
+  #         - 0
+  #         - Fn::GetAZs: ""
+  #     BackupRetentionPeriod: 
+  #     CharacterSetName: 
+  #     DBInstanceIdentifier: 
+  #     DBName: Lecture10Rds
+  #     DBParameterGroupName: 
+  #     DBSecurityGroups: 
+  #       - !Ref Lecture10SecGpForRds
+  #     DBSnapshotIdentifier: 
+  #     DBSubnetGroupName: 
+  #     Engine: mysql|oracle
+  #     EngineVersion: 
+  #     Iops: 
+  #     KmsKeyId: 
+  #     LicenseModel: 
+  #     MasterUsername: 
+  #     MasterUserPassword: 
+  #     MultiAZ: true|false
+  #     OptionGroupName: 
+  #     Port: 
+  #     PreferredBackupWindow: 
+  #     PreferredMaintenanceWindow: 
+  #     PubliclyAccessible: true|false
+  #     SourceDBInstanceIdentifier: 
+  #     StorageEncrypted: true|false
+  #     StorageType: 
+  #     VPCSecurityGroups:
+  #       - vpc-sg-id
+  #     Tags:
+  #       - Key: keyname
+  #         Value: value
+     
       
 
       
