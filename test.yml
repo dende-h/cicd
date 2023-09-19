@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  Lecture10VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/24
+      Tags:
+        -
+          Key: Name
+          Value: Lecture10-VPC
+  
+  Lecture10IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Lecture10IGW
+
+  Lecture10AttachIGW:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId : !Ref Lecture10IGW
+      VpcId: !Ref Lecture10VPC
+  
+  Lecture10PublicSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn:
+         - Lecture10AttachIGW
+    Properties:
+      VpcId: !Ref Lecture10VPC
+      Tags:
+        - Key: Name
+          Value: Lecture10PublicSubnetRouteTable
+
+  Lecture10PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.0.0/28
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Lecture10VPC
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: Lecture10PublicSubnet1
+
+  Lecture10PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.0.16/28
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Lecture10VPC
+      AvailabilityZone: 
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: Lecture10PublicSubnet2
+  
+  Lecture10AssocciateRouteTableForPublicSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref Lecture10PublicSubnetRouteTable
+      SubnetId: !Ref Lecture10PublicSubnet1
+  
+  Lecture10AssocciateRouteTableForPublicSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref Lecture10PublicSubnetRouteTable
+      SubnetId: !Ref Lecture10PublicSubnet2
+  
+  Lecture10PublicSubnetRoute:
+    Type: AWS::EC2::Route
+    DependsOn:
+         - Lecture10AttachIGW
+    Properties:
+      RouteTableId: !Ref Lecture10PublicSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref Lecture10IGW
+  
+  Lecture10PrivateSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Lecture10VPC
+      Tags:
+        - Key: Name
+          Value: Lecture10PrivateSubnetRouteTable
+
+  Lecture10PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.0.128/28
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Lecture10VPC
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: Lecture10-PrivateSubnet1
+
+  Lecture10PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.0.144/28
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Lecture10VPC
+      AvailabilityZone: 
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: Lecture10-PrivateSubnet2
+
+  Lecture10AssocciateRouteTableForPrivateSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref Lecture10PrivateSubnetRouteTable
+      SubnetId: !Ref Lecture10PrivateSubnet1
+  
+  Lecture10AssocciateRouteTableForPrivateSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref Lecture10PrivateSubnetRouteTable
+      SubnetId: !Ref Lecture10PrivateSubnet2
+      
+
+      
