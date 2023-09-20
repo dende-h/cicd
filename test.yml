@@ -315,7 +315,7 @@ Resources:
             Action: "sts:AssumeRole"
       Path: "/"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/s3fullaccess"
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
   Lecture10Ec2InstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
