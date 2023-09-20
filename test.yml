@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
+#meta
+
+#Input Parameters
 Parameters: 
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instance
@@ -8,17 +11,24 @@ Parameters:
   MyIP:
     Description: IP address allowed to access EC2
     Type: String
+  
+  DatabasePassword:
+    Description: Password for the RDS database instance
+    Type: String
+    NoEcho: true
 
+#Resource Building Templates
 Resources:
+  #Creating a VPC
   Lecture10VPC:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 10.0.0.0/24
       Tags:
-        -
-          Key: Name
+        - Key: Name
           Value: Lecture10-VPC
-  
+
+  #Creating an IGW
   Lecture10IGW:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -26,12 +36,14 @@ Resources:
         - Key: Name
           Value: Lecture10IGW
 
+  #Attach IGW and VPC
   Lecture10AttachIGW:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId : !Ref Lecture10IGW
       VpcId: !Ref Lecture10VPC
-  
+
+  #Route table for public subnets
   Lecture10PublicSubnetRouteTable:
     Type: AWS::EC2::RouteTable
     DependsOn:
@@ -42,6 +54,7 @@ Resources:
         - Key: Name
           Value: Lecture10PublicSubnetRouteTable
 
+  #Public Subnet Creation
   Lecture10PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -69,7 +82,8 @@ Resources:
       Tags:
         - Key: Name
           Value: Lecture10PublicSubnet2
-  
+
+  #Connect the route table to the public subnet
   Lecture10AssocciateRouteTableForPublicSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -82,6 +96,7 @@ Resources:
       RouteTableId: !Ref Lecture10PublicSubnetRouteTable
       SubnetId: !Ref Lecture10PublicSubnet2
   
+  #Connect public subnet route table with IGW
   Lecture10PublicSubnetRoute:
     Type: AWS::EC2::Route
     DependsOn:
@@ -91,6 +106,8 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref Lecture10IGW
   
+  #Create route table for private subnets
+  #Private subnets have separate tables to allow flexibility in accessing each resource.
   Lecture10PrivateSubnetRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -107,6 +124,7 @@ Resources:
         - Key: Name
           Value: Lecture10PrivateSubnetRouteTable2
 
+  #Create private subnet
   Lecture10PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -135,6 +153,7 @@ Resources:
         - Key: Name
           Value: Lecture10-PrivateSubnet2
 
+  #Connect private subnets and route tables
   Lecture10AssocciateRouteTableForPrivateSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -147,6 +166,81 @@ Resources:
       RouteTableId: !Ref Lecture10PrivateSubnetRouteTable2
       SubnetId: !Ref Lecture10PrivateSubnet2
   
+  #Create security group for ALB
+  Lecture10SecGpForAlb:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ec2-sec-lecture10
+      GroupDescription: securitey for ec2 access
+      VpcId: !Ref Lecture10VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref MyIP
+      Tags:
+        - Key: Name
+          Value: Lecture10SecGpForAlb 
+
+  #Create ALB
+  Lecture10Alb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer #ELB Configuration
+    Properties:
+      Name: "Lecture10-alb"
+      Scheme: "internet-facing" #Load balancer is configured for the Internet; PubIP is assigned.
+      Type: "application"
+      Subnets: 
+      - !Ref Lecture10PublicSubnet1
+      - !Ref Lecture10PublicSubnet2
+      SecurityGroups: 
+      - !Ref Lecture10SecGpForAlb
+      IpAddressType: "ipv4"
+      Tags:
+      -
+        Key: "Name"
+        Value: "Lecture10-alb"
+
+  #Create target group
+  Lecture10TargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      Name: "Lecture10-target"
+      VpcId: !Ref Lecture10VPC
+      Protocol: "HTTP"
+      ProtocolVersion: "HTTP1"
+      Port: 80
+      TargetType: "instance"
+      Targets: 
+      - Id: !Ref Lecture10Ec2
+        Port: 80
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/"
+      HealthCheckPort: "traffic-port"
+      HealthCheckProtocol: "HTTP"
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher: 
+        HttpCode: "200"
+      Tags:
+      -
+        Key: "Name"
+        Value: "Lecture10-target"
+
+#Listener Settings
+  ListenerResource:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      LoadBalancerArn: !Ref Lecture10Alb
+      Port: 80
+      Protocol: "HTTP"
+      DefaultActions: 
+      - 
+        TargetGroupArn: !Ref Lecture10TargetGroup
+        Type: "forward"       
+
+  #Create security group for EC2
   Lecture10SecGpForEc2:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -162,26 +256,44 @@ Resources:
         - Key: Name
           Value: Lecture10SecGpForEc2
   
+  #Split rule definitions to avoid circular references
+  SecurityGroupIgressForEc2: 
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      GroupId: !Ref Lecture10SecGpForEc2
+      SourceSecurityGroupId: !Ref Lecture10SecGpForAlb
+  
+  #Add outbound rules to ALB security group
+  SecurityGroupEgressForAlb:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      GroupId: !Ref Lecture10SecGpForAlb
+      DestinationSecurityGroupId: !Ref Lecture10SecGpForEc2
+
+  #Create security group for RDS
   Lecture10SecGpForRds:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: rds-sec-lecture10
       GroupDescription: securitey for rds access
       VpcId: !Ref Lecture10VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref Lecture10SecGpForEc2
       Tags:
         - Key: Name
           Value: Lecture10SecGpForRds
-  
-  SecurityGroupIgressForRds:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      IpProtocol: tcp
-      FromPort: 3306
-      ToPort: 3306
-      GroupId: !Ref Lecture10SecGpForRds
-      SourceSecurityGroupId: !Ref Lecture10SecGpForEc2
-  
-  secGroupName:
+
+  #Add RDS outbound rules
+  SecurityGroupEgressForRds:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
       IpProtocol: tcp
@@ -189,6 +301,28 @@ Resources:
       ToPort: 3306
       GroupId: !Ref Lecture10SecGpForRds
       DestinationSecurityGroupId: !Ref Lecture10SecGpForEc2
+
+  #Create EC2 IAM role
+  Lecture10Ec2IamRoleForS3:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "ec2.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/s3fullaccess"
+
+  Lecture10Ec2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: "/"
+      Roles: 
+        - !Ref Lecture10Ec2IamRoleForS3  
 
   Lecture10Ec2:
     Type: AWS::EC2::Instance
@@ -200,10 +334,11 @@ Resources:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0
           SubnetId: !Ref Lecture10PublicSubnet1
+          GroupSet:
+            - !Ref Lecture10SecGpForEc2
       InstanceType: t2.micro
+      IamInstanceProfile: !Ref Lecture10Ec2InstanceProfile
       Monitoring: false
-      SecurityGroupIds:
-        - !Ref Lecture10SecGpForEc2
       AvailabilityZone: 
         Fn::Select: 
           - 0
@@ -214,8 +349,8 @@ Resources:
             VolumeType: gp2
             VolumeSize: 8
       UserData:
-        Fn::Base64: 
-            -#!/bin/bash
+        Fn::Base64: | 
+            #!/bin/bash
             yum update -y
             yum install -y git
             yum install -y mysql
@@ -223,48 +358,95 @@ Resources:
         - Key: Name
           Value: Lecture10Ec2
   
-  # Lecture10Rds:
-  #   Type: AWS::RDS::DBInstance
-  #   Properties:
-  #     AllocatedStorage: 
-  #     DBInstanceClass: 
-  #     AllowMajorVersionUpgrade: false
-  #     AutoMinorVersionUpgrade: true
-  #     AvailabilityZone: 
-  #       Fn::Select: 
-  #         - 0
-  #         - Fn::GetAZs: ""
-  #     BackupRetentionPeriod: 
-  #     CharacterSetName: 
-  #     DBInstanceIdentifier: 
-  #     DBName: Lecture10Rds
-  #     DBParameterGroupName: 
-  #     DBSecurityGroups: 
-  #       - !Ref Lecture10SecGpForRds
-  #     DBSnapshotIdentifier: 
-  #     DBSubnetGroupName: 
-  #     Engine: mysql|oracle
-  #     EngineVersion: 
-  #     Iops: 
-  #     KmsKeyId: 
-  #     LicenseModel: 
-  #     MasterUsername: 
-  #     MasterUserPassword: 
-  #     MultiAZ: true|false
-  #     OptionGroupName: 
-  #     Port: 
-  #     PreferredBackupWindow: 
-  #     PreferredMaintenanceWindow: 
-  #     PubliclyAccessible: true|false
-  #     SourceDBInstanceIdentifier: 
-  #     StorageEncrypted: true|false
-  #     StorageType: 
-  #     VPCSecurityGroups:
-  #       - vpc-sg-id
-  #     Tags:
-  #       - Key: keyname
-  #         Value: value
-     
-      
+  #Subnet group creation
+  Lecture10RdsSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: subnet group for rds
+      DBSubnetGroupName: lecture10-subnet-group
+      SubnetIds:
+      - !Ref Lecture10PrivateSubnet1
+      - !Ref Lecture10PrivateSubnet2
+      Tags:
+      -
+        Key: Name
+        Value: Lecture10RdsSubnetGroup
+  
+  #Create RDS
+  Lecture10Rds:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      DBInstanceIdentifier: lecture10-db
+      AllocatedStorage: 20
+      DBInstanceClass: "db.t3.micro"
+      AllowMajorVersionUpgrade: false
+      AutoMinorVersionUpgrade: true
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      BackupRetentionPeriod: 0
+      CopyTagsToSnapshot: false
+      DBName: lecture10RDS
+      DeleteAutomatedBackups: true
+      DBSecurityGroups: 
+        - !Ref Lecture10SecGpForRds
+      DBSubnetGroupName: lecture10-subnet-group
+      Engine: mysql
+      EngineVersion: "8.0.33" 
+      MasterUsername: root
+      MasterUserPassword: !Ref DatabasePassword
+      MultiAZ: false
+      Port: "3306"
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      StorageType: "gp2"
+      VPCSecurityGroups: 
+        - !Ref Lecture10SecGpForRds
+      Tags:
+        - Key: Name
+          Value: Lecture10Rds
 
+  #Create S3
+  Lecture10S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      BucketName: lecture10-bucket
+      AccessControl: Private
+      Tags:
+      - Key: Name
+        Value: Lecture10S3Bucket
+
+  # Create Bucket Policy 
+  Lecture10BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Lecture10S3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS: "arn:aws:iam::584338796296:role/s3fullaccess"
+            Action:
+              - "s3:GetObject"
+              - "s3:PutObject"
+              - "s3:DeleteObject"
+            Resource: 
+             Fn::Sub:
+                - arn:${AWS::Partition}:s3:::${Lecture10S3Bucket}/*
+                - Lecture10S3Bucket: !Ref Lecture10S3Bucket
+
+  # create VPC endpoint
+  Lecture10VpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      RouteTableIds: 
+        - !Ref Lecture10PublicSubnetRouteTable
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref Lecture10VPC
       
