@@ -391,8 +391,6 @@ Resources:
       CopyTagsToSnapshot: false
       DBName: lecture10RDS
       DeleteAutomatedBackups: true
-      DBSecurityGroups: 
-        - !Ref Lecture10SecGpForRds
       DBSubnetGroupName: lecture10-subnet-group
       Engine: mysql
       EngineVersion: "8.0.33" 
