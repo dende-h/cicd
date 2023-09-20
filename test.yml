@@ -170,7 +170,7 @@ Resources:
   Lecture10SecGpForAlb:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: ec2-sec-lecture10
+      GroupName: alb-sec-lecture10
       GroupDescription: securitey for ec2 access
       VpcId: !Ref Lecture10VPC
       SecurityGroupIngress:
