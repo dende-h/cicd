@@ -91,7 +91,7 @@ Resources:
   Lecture10PublicSubnetRouteTable:
     Type: AWS::EC2::RouteTable
     DependsOn:
-         - Lecture10AttachIGW
+        - Lecture10AttachIGW
     Properties:
       VpcId: !Ref Lecture10VPC
       Tags:
@@ -144,7 +144,7 @@ Resources:
   Lecture10PublicSubnetRoute:
     Type: AWS::EC2::Route
     DependsOn:
-         - Lecture10AttachIGW
+        - Lecture10AttachIGW
     Properties:
       RouteTableId: !Ref Lecture10PublicSubnetRouteTable
       DestinationCidrBlock: 0.0.0.0/0
@@ -440,7 +440,7 @@ Resources:
                   sudo chown -R ec2-user:ec2-user /var/www
               10_clone_app: 
                 command: !Sub >
-                   git clone ${ApplicationRepositoryURL} /var/www/
+                  git clone ${ApplicationRepositoryURL} /var/www/
               11_bandle_install:
                 command: bandle install -y
               12_install_nginx: 
@@ -617,7 +617,7 @@ Resources:
               - "s3:PutObject"
               - "s3:DeleteObject"
             Resource: 
-             Fn::Sub:
+              Fn::Sub:
                 - arn:${AWS::Partition}:s3:::${Lecture10S3Bucket}/*
                 - Lecture10S3Bucket: !Ref Lecture10S3Bucket
 
