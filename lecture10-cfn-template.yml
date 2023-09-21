@@ -356,14 +356,14 @@ Resources:
   
   DatabaseWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: "MyDBInstance"
+    DependsOn: Lecture10Rds
     Properties:
       Handle: !Ref WaitHandle
       Timeout: "600"
 
   Lecture10Ec2:
     Type: AWS::EC2::Instance
-    DependsOn: "DatabaseWaitCondition"
+    DependsOn: DatabaseWaitCondition
     Metadata:
         AWS::CloudFormation::Init:
           config:
