@@ -492,7 +492,7 @@ Resources:
     Properties:
       KeyName: !Ref KeyName 
       DisableApiTermination: false 
-      ImageId: ami-0459385cdd8349115 
+      ImageId: ami-03a1b4db103179555
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0
