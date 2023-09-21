@@ -369,19 +369,9 @@ Resources:
       Roles: 
         - !Ref Lecture10Ec2IamRole  
 
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-  
-  DatabaseWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: Lecture10Rds
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "1800"
-
   Lecture10Ec2:
     Type: AWS::EC2::Instance
-    DependsOn: DatabaseWaitCondition
+    DependsOn: Lecture10Rds
     Metadata:
         AWS::CloudFormation::Init:
           config:
@@ -502,7 +492,7 @@ Resources:
     Properties:
       KeyName: !Ref KeyName 
       DisableApiTermination: false 
-      ImageId: ami-07d6bd9a28134d3b3
+      ImageId: ami-0459385cdd8349115 
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0
