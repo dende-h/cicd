@@ -360,7 +360,7 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/SecretsManagerReadOnly
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
 
   Lecture10Ec2InstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
