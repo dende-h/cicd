@@ -12,13 +12,40 @@ Parameters:
     Description: IP address allowed to access EC2
     Type: String
   
+  DatabaseName:
+    Description: DBname for the RDS database instance
+    Type: String
+
+  DatabaseMasterUser:
+    Description: Username for the RDS database instance
+    Type: String
+    NoEcho: true
+
   DatabasePassword:
     Description: Password for the RDS database instance
     Type: String
     NoEcho: true
+  
+  ApplicationRepositoryURL:
+    Description: application rep url for deploy
+    Type: String
 
 #Resource Building Templates
 Resources:
+  DatabaseSecret:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Name: Lecture10DatabaseSecret
+      Description: Database credentials for sample app
+      SecretString: 
+        !Sub |
+          {
+            "username": "${DatabaseMasterUser}",
+            "password": "${DatabasePassword}"
+          }
+
   #Creating a VPC
   Lecture10VPC:
     Type: AWS::EC2::VPC
@@ -326,6 +353,90 @@ Resources:
 
   Lecture10Ec2:
     Type: AWS::EC2::Instance
+    Metadata:
+        AWS::CloudFormation::Init:
+          config:
+            packages:
+              yum:
+                make: []
+                gcc-c++: []
+                patch: []
+                openssl-devel: [] 
+                libyaml-devel: [] 
+                libffi-devel: [] 
+                libicu-devel: [] 
+                libxml2 libxslt: [] 
+                libxml2-devel: [] 
+                libxslt-devel: [] 
+                zlib-devel: [] 
+                readline-devel: [] 
+                ImageMagick: [] 
+                ImageMagick-devel: [] 
+                epel-release: []
+            comands:
+              01_install_rbev:
+                command: >
+                  git clone https://github.com/rbenv/rbenv.git ~/.rbenv &&
+                  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile &&
+                  echo 'eval "$(rbenv init -)"' >> ~/.bash_profile &&
+                  source ~/.bash_profile
+              02_install_ruby-build:
+                command: git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+              03_install_ruby:
+                command: >
+                  rbenv install 3.1.2 &&
+                  rbenv global 3.1.2
+              04_install_bundler: 
+                command: gem install bundler
+              05_install_nvm:
+                command: >
+                  git clone https://github.com/creationix/nvm.git ~/.nvm &&
+                  echo 'export NVM_DIR="$HOME/.nvm" ' >> ~/.bashrc &&
+                  echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' >> ~/.bashrc &&
+                  echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" ' >> ~/.bashrc &&
+                  source ~/.bashrc
+              06_install_node:
+                command: nvm install v16.20.2
+              07_install_yarn:
+                command: npm install -g yarn
+              08_install_sql-devel:
+                command: >
+                  sudo yum localinstall https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm &&
+                  sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 &&
+                  sudo yum install mysql-community-devel
+              09_make_dir:
+                command: >
+                  sudo mkdir -p /var/www &&
+                  sudo chmod -R 755 /var/www &&
+                  sudo chown -R ec2-user:ec2-user /var/www
+              10_clone_app: 
+                command: !Sub >
+                   git clone ${ApplicationRepositoryURL} /var/www/
+              11_bandle_install:
+                command: bandle install -y
+              12_install_nginx: 
+                command: >
+                  sudo yum install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm -y &&
+                  sudo yum install nginx -y
+              13_config_nginx:
+                command: >
+                  sudo mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ &&
+                  sudo rm /etc/nginx/conf.d/default.conf
+            file:
+              files:
+                "/var/www/raisetech-live8-sample-app/config/database.yml":
+                content: !Sub |
+                  production:
+                    adapter: mysql2
+                    encoding: utf8
+                    database: ${DatabaseName}
+                    username: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:username}}'
+                    password: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:password}}'
+                    host: !Ref MyDBInstance
+                    port: 3306
+          mode: "000644"
+          owner: "ec2-user"
+          group: "ec2-user"
     Properties:
       KeyName: !Ref KeyName 
       DisableApiTermination: false 
@@ -349,11 +460,14 @@ Resources:
             VolumeType: gp2
             VolumeSize: 8
       UserData:
-        Fn::Base64: | 
-            #!/bin/bash
+        Fn::Base64: 
+          !Sub | 
+            #!/bin/bash -xe
             yum update -y
             yum install -y git
-            yum install -y mysql
+            sudo yum remove -y mariadb-libs
+            yum install -y aws-cfn-bootstrap
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyEC2Instance --region ${AWS::Region}
       Tags:
         - Key: Name
           Value: Lecture10Ec2
@@ -389,12 +503,12 @@ Resources:
           - Fn::GetAZs: ""
       BackupRetentionPeriod: 0
       CopyTagsToSnapshot: false
-      DBName: lecture10RDS
+      DBName: !Ref DatabaseName
       DeleteAutomatedBackups: true
       DBSubnetGroupName: lecture10-subnet-group
       Engine: mysql
       EngineVersion: "8.0.33" 
-      MasterUsername: root
+      MasterUsername: !Ref DatabaseMasterUser
       MasterUserPassword: !Ref DatabasePassword
       MultiAZ: false
       Port: "3306"
