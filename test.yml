@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-#meta
+Description: 'Template for assignment for RaiseTech 10th lecture'
 
 #Input Parameters
 Parameters: 
