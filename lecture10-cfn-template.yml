@@ -394,7 +394,7 @@ Resources:
               ImageMagick-devel: []
               epel-release: []
           commands:
-            01_install_rbev:
+            01_install_rbenv:
               command: >
                 git clone https://github.com/rbenv/rbenv.git ~/.rbenv &&
                 echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile &&
@@ -491,7 +491,7 @@ Resources:
     Properties:
       KeyName: !Ref KeyName 
       DisableApiTermination: false 
-      ImageId: ami-03a1b4db103179555
+      ImageId: ami-07d6bd9a28134d3b3
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0
