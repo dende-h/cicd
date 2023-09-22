@@ -373,119 +373,119 @@ Resources:
     Type: AWS::EC2::Instance
     DependsOn: Lecture10Rds
     Metadata:
-        AWS::CloudFormation::Init:
-          config:
-            packages:
-              yum:
-                make: []
-                gcc-c++: []
-                patch: []
-                openssl-devel: [] 
-                libyaml-devel: [] 
-                libffi-devel: [] 
-                libicu-devel: [] 
-                libxml2 libxslt: [] 
-                libxml2-devel: [] 
-                libxslt-devel: [] 
-                zlib-devel: [] 
-                readline-devel: [] 
-                ImageMagick: [] 
-                ImageMagick-devel: [] 
-                epel-release: []
-            commands:
-              01_install_rbev:
-                command: >
-                  git clone https://github.com/rbenv/rbenv.git ~/.rbenv &&
-                  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile &&
-                  echo 'eval "$(rbenv init -)"' >> ~/.bash_profile &&
-                  source ~/.bash_profile
-              02_install_ruby-build:
-                command: git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
-              03_install_ruby:
-                command: >
-                  rbenv install 3.1.2 &&
-                  rbenv global 3.1.2
-              04_install_bundler: 
-                command: gem install bundler
-              05_install_nvm:
-                command: >
-                  git clone https://github.com/creationix/nvm.git ~/.nvm &&
-                  echo 'export NVM_DIR="$HOME/.nvm" ' >> ~/.bashrc &&
-                  echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' >> ~/.bashrc &&
-                  echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" ' >> ~/.bashrc &&
-                  source ~/.bashrc
-              06_install_node:
-                command: nvm install v16.20.2
-              07_install_yarn:
-                command: npm install -g yarn
-              08_install_sql-devel:
-                command: >
-                  yum localinstall https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm &&
-                  rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 &&
-                  yum install mysql-community-devel
-              09_make_dir:
-                command: >
-                  mkdir -p /var/www &&
-                  chmod -R 755 /var/www &&
-                  chown -R ec2-user:ec2-user /var/www
-              10_clone_app: 
-                command: !Sub >
-                  git clone ${ApplicationRepositoryURL} /var/www/
-              11_install_nginx: 
-                command: >
-                  yum install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm -y &&
-                  yum install nginx -y
-              12_config_nginx:
-                command: >
-                  mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ &&
-                  rm /etc/nginx/conf.d/default.conf
-            files:
-              "/var/www/raisetech-live8-sample-app/config/database.yml":
-                content: !Sub |
-                  production:
-                    adapter: mysql2
-                    encoding: utf8
-                    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-                    database: ${DatabaseName}
-                    username: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:username}}'
-                    password: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:password}}'
-                    host: ${Lecture10Rds.Endpoint.Address}
-                    port: 3306
-                mode: "000644"
-                owner: "ec2-user"
-                group: "ec2-user"
-              "/var/www/raisetech-live8-sample-app/config/secrets.yml": 
-                content: |
-                  production:
-                    secret_key_base: '{{resolve:secretsmanager:SecretKeyBase:SecretString:key}}'
-                mode: "000644"
-                owner: "root"
-                group: "root"
-              "/var/www/raisetech-live8-sample-app/config/storage.yml":
-                content: !Sub |
-                  test:
-                    service: Disk
-                    root: <%= Rails.root.join("tmp/storage") %>
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              make: []
+              gcc-c++: []
+              patch: []
+              openssl-devel: [] 
+              libyaml-devel: [] 
+              libffi-devel: [] 
+              libicu-devel: [] 
+              libxml2 libxslt: [] 
+              libxml2-devel: [] 
+              libxslt-devel: [] 
+              zlib-devel: [] 
+              readline-devel: [] 
+              ImageMagick: [] 
+              ImageMagick-devel: [] 
+              epel-release: []
+          commands:
+            01_install_rbev:
+              command: >
+                git clone https://github.com/rbenv/rbenv.git ~/.rbenv &&
+                echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile &&
+                echo 'eval "$(rbenv init -)"' >> ~/.bash_profile &&
+                source ~/.bash_profile
+            02_install_ruby-build:
+              command: git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+            03_install_ruby:
+              command: >
+                rbenv install 3.1.2 &&
+                rbenv global 3.1.2
+            04_install_bundler: 
+              command: gem install bundler
+            05_install_nvm:
+              command: >
+                git clone https://github.com/creationix/nvm.git ~/.nvm &&
+                echo 'export NVM_DIR="$HOME/.nvm" ' >> ~/.bashrc &&
+                echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' >> ~/.bashrc &&
+                echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" ' >> ~/.bashrc &&
+                source ~/.bashrc
+            06_install_node:
+              command: nvm install v16.20.2
+            07_install_yarn:
+              command: npm install -g yarn
+            08_install_sql-devel:
+              command: >
+                yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm &&
+                rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 &&
+                yum install -y mysql-community-devel
+            09_make_dir:
+              command: >
+                mkdir -p /var/www &&
+                chmod -R 755 /var/www &&
+                chown -R ec2-user:ec2-user /var/www
+            10_clone_app: 
+              command: !Sub >
+                git clone ${ApplicationRepositoryURL} /var/www/
+            11_install_nginx: 
+              command: >
+                yum install -y http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm &&
+                yum install -y nginx
+            12_config_nginx:
+              command: >
+                mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ &&
+                rm /etc/nginx/conf.d/default.conf
+          files:
+            "/var/www/raisetech-live8-sample-app/config/database.yml":
+              content: !Sub |
+                production:
+                  adapter: mysql2
+                  encoding: utf8
+                  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+                  database: ${DatabaseName}
+                  username: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:username}}'
+                  password: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:password}}'
+                  host: ${Lecture10Rds.Endpoint.Address}
+                  port: 3306
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+            "/var/www/raisetech-live8-sample-app/config/secrets.yml": 
+              content: |
+                production:
+                  secret_key_base: '{{resolve:secretsmanager:SecretKeyBase:SecretString:key}}'
+              mode: "000644"
+              owner: "root"
+              group: "root"
+            "/var/www/raisetech-live8-sample-app/config/storage.yml":
+              content: !Sub |
+                test:
+                  service: Disk
+                  root: <%= Rails.root.join("tmp/storage") %>
 
-                  local:
-                    service: Disk
-                    root: <%= Rails.root.join("storage") %>
+                local:
+                  service: Disk
+                  root: <%= Rails.root.join("storage") %>
 
-                  amazon:
-                    service: S3
-                    region: ${AWS::Region}
-                    bucket: ${S3BucketName}
-                mode: "000644"
-                owner: "root"
-                group: "root"
+                amazon:
+                  service: S3
+                  region: ${AWS::Region}
+                  bucket: ${S3BucketName}
+              mode: "000644"
+              owner: "root"
+              group: "root"
           config-start:
             commands:
               13_setup_rails:
                 command: >
                   cd /var/www/raisetech-live8-sample-app &&
-                  RAILS_ENV=production ./bin/setup &&
+                  RAILS_ENV=production /bin/setup &&
                   RAILS_ENV=production rake assets:precompile &&
-                  sudo systemctl start nginx.service &&
+                  systemctl start nginx.service &&
                   rails unicorn:start
     Properties:
       KeyName: !Ref KeyName 
@@ -524,14 +524,9 @@ Resources:
             sudo yum remove -y mariadb-libs
             yum install -y aws-cfn-bootstrap
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
       Tags:
         - Key: Name
           Value: Lecture10Ec2
-    CreationPolicy:
-      ResourceSignal:
-        Count: 1
-        Timeout: PT10M
   
   #Subnet group creation
   Lecture10RdsSubnetGroup:
