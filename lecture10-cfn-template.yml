@@ -396,13 +396,11 @@ Resources:
           commands:
             01_install_ruby:
               command: >
+                sudo -u ec2-user bash -c "source /home/ec2-user/.bash_profile"
                 sudo -u ec2-user /home/ec2-user/.rbenv/bin/rbenv install 3.1.2 &&
                 sudo -u ec2-user /home/ec2-user/.rbenv/bin/rbenv global 3.1.2
             02_install_bundler: 
               command: sudo -u ec2-user gem install bundler
-            03_install_sql-devel:
-              command: >
-                
             04_make_dir:
               command: >
                 mkdir -p /var/www &&
@@ -499,7 +497,7 @@ Resources:
             sudo -u ec2-user git clone https://github.com/rbenv/rbenv.git /home/ec2-user/.rbenv 
             echo 'export PATH="$HOME/.rbenv/bin:$PATH"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
             echo 'eval "$(rbenv init -)"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
-            sudo -u ec2-user source /home/ec2-user/.bash_profile
+            sudo -u ec2-user bash -c "source /home/ec2-user/.bash_profile"
             sudo -u ec2-user git clone https://github.com/rbenv/ruby-build.git /home/ec2-user/.rbenv/plugins/ruby-build
             sudo -u ec2-user git clone https://github.com/creationix/nvm.git /home/ec2-user/.nvm 
             echo 'export NVM_DIR="$HOME/.nvm" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc > /dev/null
