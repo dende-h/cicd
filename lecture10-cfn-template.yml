@@ -498,7 +498,7 @@ Resources:
             sudo yum install -y mysql-community-devel
             git clone https://github.com/rbenv/rbenv.git ~/.rbenv 
             echo 'export PATH="$HOME/.rbenv/bin:$PATH"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
-            echo 'eval "$(rbenv init -)"' | sudo -u ec2-user tee -a /hone/ec2-user/.bash_profile > /dev/null
+            echo 'eval "$(rbenv init -)"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
             source ~/.bash_profile
             git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
             git clone https://github.com/creationix/nvm.git ~/.nvm 
