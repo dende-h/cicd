@@ -376,21 +376,22 @@ Resources:
       AWS::CloudFormation::Init:
         config:
           packages:
-            yum:
+            yum:       
               make: []
               gcc-c++: []
               patch: []
-              openssl-devel: [] 
-              libyaml-devel: [] 
-              libffi-devel: [] 
-              libicu-devel: [] 
-              libxml2 libxslt: [] 
-              libxml2-devel: [] 
-              libxslt-devel: [] 
-              zlib-devel: [] 
-              readline-devel: [] 
-              ImageMagick: [] 
-              ImageMagick-devel: [] 
+              openssl-devel: []
+              libyaml-devel: []
+              libffi-devel: []
+              libicu-devel: []
+              libxml2: []
+              libxslt: []
+              libxml2-devel: []
+              libxslt-devel: []
+              zlib-devel: []
+              readline-devel: []
+              ImageMagick: []
+              ImageMagick-devel: []
               epel-release: []
           commands:
             01_install_rbev:
@@ -513,8 +514,8 @@ Resources:
         Fn::Base64: 
           !Sub | 
             #!/bin/bash -xe
-            yum update -y
-            yum install -y git
+            sudo yum update -y
+            sudo yum install -y git
             sudo yum install -y nc
             until nc -z ${Lecture10Rds.Endpoint.Address} 3306
             do
@@ -522,7 +523,8 @@ Resources:
               sleep 30
             done
             sudo yum remove -y mariadb-libs
-            yum install -y aws-cfn-bootstrap
+            sudo amazon-linux-extras install epel -y
+            sudo yum install -y aws-cfn-bootstrap
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
       Tags:
         - Key: Name
