@@ -547,6 +547,7 @@ Resources:
   #Create RDS
   Lecture10Rds:
     Type: AWS::RDS::DBInstance
+    DependsOn: Lecture10RdsSubnetGroup
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
