@@ -392,7 +392,7 @@ Resources:
                 ImageMagick: [] 
                 ImageMagick-devel: [] 
                 epel-release: []
-            comands:
+            commands:
               01_install_rbev:
                 command: >
                   git clone https://github.com/rbenv/rbenv.git ~/.rbenv &&
@@ -420,27 +420,25 @@ Resources:
                 command: npm install -g yarn
               08_install_sql-devel:
                 command: >
-                  sudo yum localinstall https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm &&
-                  sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 &&
-                  sudo yum install mysql-community-devel
+                  yum localinstall https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm &&
+                  rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 &&
+                  yum install mysql-community-devel
               09_make_dir:
                 command: >
-                  sudo mkdir -p /var/www &&
-                  sudo chmod -R 755 /var/www &&
-                  sudo chown -R ec2-user:ec2-user /var/www
+                  mkdir -p /var/www &&
+                  chmod -R 755 /var/www &&
+                  chown -R ec2-user:ec2-user /var/www
               10_clone_app: 
                 command: !Sub >
                   git clone ${ApplicationRepositoryURL} /var/www/
-              11_bandle_install:
-                command: bandle install -y
-              12_install_nginx: 
+              11_install_nginx: 
                 command: >
-                  sudo yum install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm -y &&
-                  sudo yum install nginx -y
-              13_config_nginx:
+                  yum install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm -y &&
+                  yum install nginx -y
+              12_config_nginx:
                 command: >
-                  sudo mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ &&
-                  sudo rm /etc/nginx/conf.d/default.conf
+                  mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ &&
+                  rm /etc/nginx/conf.d/default.conf
             files:
               "/var/www/raisetech-live8-sample-app/config/database.yml":
                 content: !Sub |
@@ -481,11 +479,11 @@ Resources:
                 owner: "root"
                 group: "root"
           config-start:
-            comands:
-              14_setup_rails:
+            commands:
+              13_setup_rails:
                 command: >
                   cd /var/www/raisetech-live8-sample-app &&
-                  RAILS_ENV=production /bin/setup &&
+                  RAILS_ENV=production ./bin/setup &&
                   RAILS_ENV=production rake assets:precompile &&
                   sudo systemctl start nginx.service &&
                   rails unicorn:start
@@ -525,10 +523,15 @@ Resources:
             done
             sudo yum remove -y mariadb-libs
             yum install -y aws-cfn-bootstrap
-            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyEC2Instance --region ${AWS::Region}
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
       Tags:
         - Key: Name
           Value: Lecture10Ec2
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT10M
   
   #Subnet group creation
   Lecture10RdsSubnetGroup:
