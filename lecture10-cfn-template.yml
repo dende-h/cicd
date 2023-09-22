@@ -394,49 +394,28 @@ Resources:
               ImageMagick-devel: []
               epel-release: []
           commands:
-            01_install_rbenv:
+            01_install_ruby:
               command: >
-                git clone https://github.com/rbenv/rbenv.git ~/.rbenv &&
-                echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile &&
-                echo 'eval "$(rbenv init -)"' >> ~/.bash_profile &&
-                source ~/.bash_profile
-            02_install_ruby-build:
-              command: git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
-            03_install_ruby:
+                sudo -u ec2-user /home/ec2-user/.rbenv/bin/rbenv install 3.1.2 &&
+                sudo -u ec2-user /home/ec2-user/.rbenv/bin/rbenv global 3.1.2
+            02_install_bundler: 
+              command: sudo -u ec2-user gem install bundler
+            03_install_sql-devel:
               command: >
-                rbenv install 3.1.2 &&
-                rbenv global 3.1.2
-            04_install_bundler: 
-              command: gem install bundler
-            05_install_nvm:
-              command: >
-                git clone https://github.com/creationix/nvm.git ~/.nvm &&
-                echo 'export NVM_DIR="$HOME/.nvm" ' >> ~/.bashrc &&
-                echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' >> ~/.bashrc &&
-                echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" ' >> ~/.bashrc &&
-                source ~/.bashrc
-            06_install_node:
-              command: nvm install v16.20.2
-            07_install_yarn:
-              command: npm install -g yarn
-            08_install_sql-devel:
-              command: >
-                yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm &&
-                rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 &&
-                yum install -y mysql-community-devel
-            09_make_dir:
+                
+            04_make_dir:
               command: >
                 mkdir -p /var/www &&
                 chmod -R 755 /var/www &&
                 chown -R ec2-user:ec2-user /var/www
-            10_clone_app: 
+            05_clone_app: 
               command: !Sub >
                 git clone ${ApplicationRepositoryURL} /var/www/
-            11_install_nginx: 
+            06_install_nginx: 
               command: >
                 yum install -y http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm &&
                 yum install -y nginx
-            12_config_nginx:
+            07_config_nginx:
               command: >
                 mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ &&
                 rm /etc/nginx/conf.d/default.conf
@@ -460,8 +439,8 @@ Resources:
                 production:
                   secret_key_base: '{{resolve:secretsmanager:SecretKeyBase:SecretString:key}}'
               mode: "000644"
-              owner: "root"
-              group: "root"
+              owner: "ec2-user"
+              group: "ec2-user"
             "/var/www/raisetech-live8-sample-app/config/storage.yml":
               content: !Sub |
                 test:
@@ -477,17 +456,8 @@ Resources:
                   region: ${AWS::Region}
                   bucket: ${S3BucketName}
               mode: "000644"
-              owner: "root"
-              group: "root"
-          config-start:
-            commands:
-              13_setup_rails:
-                command: >
-                  cd /var/www/raisetech-live8-sample-app &&
-                  RAILS_ENV=production /bin/setup &&
-                  RAILS_ENV=production rake assets:precompile &&
-                  systemctl start nginx.service &&
-                  rails unicorn:start
+              owner: "ec2-user"
+              group: "ec2-user"
     Properties:
       KeyName: !Ref KeyName 
       DisableApiTermination: false 
@@ -523,9 +493,29 @@ Resources:
               sleep 30
             done
             sudo yum remove -y mariadb-libs
+            sudo yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+            sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+            sudo yum install -y mysql-community-devel
+            git clone https://github.com/rbenv/rbenv.git ~/.rbenv 
+            echo 'export PATH="$HOME/.rbenv/bin:$PATH"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
+            echo 'eval "$(rbenv init -)"' | sudo -u ec2-user tee -a /hone/ec2-user/.bash_profile > /dev/null
+            source ~/.bash_profile
+            git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+            git clone https://github.com/creationix/nvm.git ~/.nvm 
+            echo 'export NVM_DIR="$HOME/.nvm" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc > /dev/null
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc > /dev/null
+            echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc 
+            source ~/.bashrc
+            nvm install v16.20.2
+            npm install -g yarn
             sudo amazon-linux-extras install epel -y
             sudo yum install -y aws-cfn-bootstrap
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
+            cd /var/www/raisetech-live8-sample-app 
+            RAILS_ENV=production /bin/setup 
+            RAILS_ENV=production rake assets:precompile 
+            systemctl start nginx.service 
+            rails unicorn:start
       Tags:
         - Key: Name
           Value: Lecture10Ec2
