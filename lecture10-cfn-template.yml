@@ -375,48 +375,6 @@ Resources:
     Metadata:
       AWS::CloudFormation::Init:
         config:
-          packages:
-            yum:       
-              make: []
-              gcc-c++: []
-              patch: []
-              openssl-devel: []
-              libyaml-devel: []
-              libffi-devel: []
-              libicu-devel: []
-              libxml2: []
-              libxslt: []
-              libxml2-devel: []
-              libxslt-devel: []
-              zlib-devel: []
-              readline-devel: []
-              ImageMagick: []
-              ImageMagick-devel: []
-              epel-release: []
-          commands:
-            01_install_ruby:
-              command: >
-                sudo -u ec2-user bash -c "source /home/ec2-user/.bash_profile"
-                sudo -u ec2-user /home/ec2-user/.rbenv/bin/rbenv install 3.1.2 &&
-                sudo -u ec2-user /home/ec2-user/.rbenv/bin/rbenv global 3.1.2
-            02_install_bundler: 
-              command: sudo -u ec2-user gem install bundler
-            04_make_dir:
-              command: >
-                mkdir -p /var/www &&
-                chmod -R 755 /var/www &&
-                chown -R ec2-user:ec2-user /var/www
-            05_clone_app: 
-              command: !Sub >
-                git clone ${ApplicationRepositoryURL} /var/www/
-            06_install_nginx: 
-              command: >
-                yum install -y http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm &&
-                yum install -y nginx
-            07_config_nginx:
-              command: >
-                mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ &&
-                rm /etc/nginx/conf.d/default.conf
           files:
             "/var/www/raisetech-live8-sample-app/config/database.yml":
               content: !Sub |
@@ -483,6 +441,8 @@ Resources:
           !Sub | 
             #!/bin/bash -xe
             yum update -y
+            echo 'curl -s -L "https://gist.githubusercontent.com/makocchi-git/9775443/raw/4b6b12592dca43a9d67e3003c8af150be6fc80f6/hagure-metal.txt"' | tee -a /etc/update-motd.d/30-banner > dev/null
+            update-motd
             yum install -y git
             yum install -y nc
             until nc -z ${Lecture10Rds.Endpoint.Address} 3306
@@ -490,6 +450,8 @@ Resources:
               echo "waiting for RDS endpoint..."
               sleep 30
             done
+            amazon-linux-extras install epel -y
+            yum install -y git make gcc-c++ patch openssl-devel libyaml-devel libffi-devel libicu-devel libxml2 libxslt libxml2-devel libxslt-devel zlib-devel readline-devel ImageMagick ImageMagick-devel epel-release
             yum remove -y mariadb-libs
             yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
             rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
@@ -497,16 +459,18 @@ Resources:
             sudo -u ec2-user git clone https://github.com/rbenv/rbenv.git /home/ec2-user/.rbenv 
             echo 'export PATH="$HOME/.rbenv/bin:$PATH"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
             echo 'eval "$(rbenv init -)"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
-            sudo -u ec2-user bash -c "source /home/ec2-user/.bash_profile"
+            sudo -u ec2-user bash -c 'source /home/ec2-user/.bash_profile && rbenv install 3.1.2 && rbenv global 3.1.2'
             sudo -u ec2-user git clone https://github.com/rbenv/ruby-build.git /home/ec2-user/.rbenv/plugins/ruby-build
             sudo -u ec2-user git clone https://github.com/creationix/nvm.git /home/ec2-user/.nvm 
             echo 'export NVM_DIR="$HOME/.nvm" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc > /dev/null
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc > /dev/null
             echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc 
-            sudo -u ec2-user bash -c "source /home/ec2-user/.bashrc"
-            sudo -u ec2-user nvm install v16.20.2
-            sudo -u ec2-user npm install -g yarn
-            amazon-linux-extras install epel -y
+            sudo -u ec2-user bash -i -c 'source /home/ec2-user/.bashrc && nvm install v16.20.2 && npm install -g yarn'
+            sudo -u ec2-user gem install bundler
+            mkdir -p /var/www && chmod -R 755 /var/www && chown -R ec2-user:ec2-user /var/www
+            git clone ${ApplicationRepositoryURL} /var/www/
+            yum install -y http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm && yum install -y nginx
+            mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ && rm /etc/nginx/conf.d/default.conf
             yum install -y aws-cfn-bootstrap
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
             cd /var/www/raisetech-live8-sample-app 
