@@ -383,8 +383,8 @@ Resources:
                   encoding: utf8
                   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
                   database: ${DatabaseName}
-                  username: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:username}}'
-                  password: '{{resolve:secretsmanager:MyDatabaseSecret:SecretString:password}}'
+                  username: <%= Rails.application.config.db_username %>
+                  password: <%= Rails.application.config.db_password %>
                   host: ${Lecture10Rds.Endpoint.Address}
                   port: 3306
               mode: "000644"
@@ -393,7 +393,7 @@ Resources:
             "/var/www/raisetech-live8-sample-app/config/secrets.yml": 
               content: |
                 production:
-                  secret_key_base: '{{resolve:secretsmanager:SecretKeyBase:SecretString:key}}'
+                  secret_key_base: <%= Rails.application.config.secret_key_base %>
               mode: "000644"
               owner: "ec2-user"
               group: "ec2-user"
@@ -459,25 +459,17 @@ Resources:
             sudo -u ec2-user git clone https://github.com/rbenv/rbenv.git /home/ec2-user/.rbenv 
             echo 'export PATH="$HOME/.rbenv/bin:$PATH"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
             echo 'eval "$(rbenv init -)"' | sudo -u ec2-user tee -a /home/ec2-user/.bash_profile > /dev/null
-            sudo -u ec2-user bash -c 'source /home/ec2-user/.bash_profile && rbenv install 3.1.2 && rbenv global 3.1.2'
             sudo -u ec2-user git clone https://github.com/rbenv/ruby-build.git /home/ec2-user/.rbenv/plugins/ruby-build
             sudo -u ec2-user git clone https://github.com/creationix/nvm.git /home/ec2-user/.nvm 
             echo 'export NVM_DIR="$HOME/.nvm" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc > /dev/null
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc > /dev/null
             echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" ' | sudo -u ec2-user tee -a /home/ec2-user/.bashrc 
-            sudo -u ec2-user bash -i -c 'source /home/ec2-user/.bashrc && nvm install v16.20.2 && npm install -g yarn'
-            sudo -u ec2-user gem install bundler
-            mkdir -p /var/www && chmod -R 755 /var/www && chown -R ec2-user:ec2-user /var/www
-            git clone ${ApplicationRepositoryURL} /var/www/
+            mkdir -p /var/www && chmod -R 755 /var/www && chown -R ec2-user:ec2-user /var/www && cd /var/www
+            git clone ${ApplicationRepositoryURL}
             yum install -y http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm && yum install -y nginx
             mv /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf /etc/nginx/conf.d/ && rm /etc/nginx/conf.d/default.conf
             yum install -y aws-cfn-bootstrap
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Lecture10Ec2 --region ${AWS::Region}
-            cd /var/www/raisetech-live8-sample-app 
-            sudo -u ec2-user RAILS_ENV=production /bin/setup 
-            sudo -u ec2-user RAILS_ENV=production rake assets:precompile 
-            systemctl start nginx.service 
-            rails unicorn:start
       Tags:
         - Key: Name
           Value: Lecture10Ec2
