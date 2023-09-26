@@ -26,7 +26,8 @@
 **テンプレートの説明と作成時のインプットパラメータ定義**
 - パラメータにはバリデーションを実装
 
-![parameter]() 
+![parameter](./images/lecture10/param2023-09-27.png) 
+![valid](./images/lecture10/vliadparam2023-09-27.png)
 
 ```yaml
 AWSTemplateFormatVersion: "2010-09-09"
@@ -82,7 +83,7 @@ Parameters:
   
 **VPCの作成**
 
-![]()
+![vpc](./images/lecture10/vpc2023-09-27.png)
 
 ```yaml
 #Creating a VPC
@@ -100,7 +101,7 @@ Parameters:
 - 先に作ったVPCにアタッチ
 - !Ref <論理ID>で構築したリソースのIDを紐付けることが出来る 
 　
-![]()
+![igw](./images/lecture10/igw2023-09-27%20053313.png)
 
 ```yaml
   #Creating an IGW
@@ -123,7 +124,7 @@ Parameters:
 - パブリックサブネットを二つ作成
 - 作成したルートテーブルに2つのパブリックサブネットを紐付ける
 
-![]()
+![publicsubroute](./images/lecture10/publicsubnetroutertable2023-09-27.png)
 
 ```yaml
   #Route table for public subnets
@@ -194,7 +195,8 @@ Parameters:
 - プライベートサブネットはルートテーブルを2つ作って別々に接続
 - 今後のプライベートサブネットの使い方の幅を広げるため
 
-![]()
+![praivatesubroute1](./images/lecture10/praivatesubnet1routetable2023-09-27.png)
+![praivatesubroute2](./images/lecture10/praivatesubnet2routetable2023-09-27.png)
 
 ```yaml
  #Private subnets have separate tables to allow flexibility in accessing each resource.
@@ -256,13 +258,19 @@ Parameters:
       RouteTableId: !Ref Lecture10PrivateSubnetRouteTable2
       SubnetId: !Ref Lecture10PrivateSubnet2
 ```
-  
+**ResourceMap**
+
+![resource](./images/lecture10/resourcemap2023-09-27.png)
+
 **ALBの構築**
 - ALB用のセキュリティグループを作成
 - myIPはパラメータで入力した値
 - ALB本体とターゲットグループ、リスナーを作成
 
-![]()
+![alb](./images/lecture10/alb2023-09-27.png)
+![albmap](./images/lecture10/albmap2023-09-27.png)
+![listener](./images/lecture10/listener2023-09-27.png)
+![target](./images/lecture10/target2023-09-27.png)
 
 ```yaml
 #Create security group for ALB
