@@ -701,6 +701,7 @@ Lecture10Ec2:
   
 **構築完了と出力内容**
 
+![stack](./images/lecture10/stack2023-09-28.png) 
 ![comp](./images/lecture10/eventlog2023-09-27.png) 
 ![outputs](./images/lecture10/outputs2023-09-27.png)
 
