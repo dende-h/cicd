@@ -22,6 +22,10 @@
     - 固有のパラメータは組み込み関数
     - 依存関係を明示的に定義しないとリソース作成失敗したり、削除失敗する
     - UserDataセクションにリソース立ち上げ時に実行するコマンドを定義できる
+    - このぐらいの構築でも(スクリプト除く)400行を超えてくるので、可読性向上のためにソースを分割した方がいい
+    - 分割するとしたら機能リソースごとで分けるか、権限ごとでわけるか、どういう構成があるのか学習必要
+    - 実際はCloudFormarionのスクリプトだけでここまですることはあまりない
+    - デプロイまでの自動化は他のツールを利用が普通
 ### 構築とコード
 **テンプレートの説明と作成時のインプットパラメータ定義**
 - パラメータにはバリデーションを実装
@@ -351,7 +355,10 @@ Parameters:
 **EC2とRDSのセキュリティグループを作成**
 - 循環参照を避けるため、インバウンドルールとアウトバウンドルールを後から追加
 
-![]()
+![secgp1](./images/lecture10/ec2sec-in2023-09-27.png)
+![secgp2](./images/lecture10/ec2sec-out2023-09-27.png)
+![secgp3](./images/lecture10/rdssec-in2023-09-27.png)
+![secgp4](./images/lecture10/rdssec-out2023-09-27.png)
 
 ```yaml
 #Create security group for EC2
@@ -420,7 +427,7 @@ Parameters:
 **EC2にS3アクセスのためのロールを作成**
 - IamInstanceProfileに紐付けるためのLecture10Ec2InstanceProfileを作成
 
-![]()
+![role](./images/lecture10/role2023-09-27.png)
 
 ```yaml
 #Create EC2 IAM role
@@ -453,7 +460,9 @@ Parameters:
 - RDSのエンドポイントが作成されてからEC2が構築されるようuntil nc -z ${Lecture10Rds.Endpoint.Address} 3306で遅延処理を行っている
 - update-motdでEC2にssh接続した際のバナーをカスタマイズ(遊び心)
 
-![]()
+![ec2](./images/lecture10/ec2-2023-09-27.png)
+![banner](./images/lecture10/ec2-banner2023-09-27.png)
+![haguremetal](./images/lecture10/hgmt2023-09-27.png)
 
 ```yaml
 Lecture10Ec2:
@@ -578,7 +587,7 @@ Lecture10Ec2:
 - DependsOn: Lecture10RdsSubnetGroupを作成してから構築する。明示的しておかないとスタック削除失敗する場合がある。
 - ユーザー名とパスワードは入力したパラメータから取得 
 
-![]()
+![rds](./images/lecture10/rds2023-09-27.png)
 
 ```yaml
 #Subnet group creation
@@ -636,7 +645,8 @@ Lecture10Ec2:
 - パブリックアクセスは許可しない設定 
 - ロールの付いたEC2からのみアクセスを許可
 
-![]()
+![s3](./images/lecture10/s3-2023-09-27.png)
+![s3p](./images/lecture10/s3-policy2023-09-27.png)
 
 ```yaml
 #Create S3
@@ -676,7 +686,7 @@ Lecture10Ec2:
 **VPCエンドポイントを作成構築**
 - パブリックサブネットのルートテーブルと接続
 
-![]()
+![endpoint](./images/lecture10/vpc-endpoint2023-09-27.png)
 
 ```yaml
 # create VPC endpoint
@@ -689,9 +699,10 @@ Lecture10Ec2:
       VpcId: !Ref Lecture10VPC
 ```
   
-**構築後に出力する内容**
+**構築完了と出力内容**
 
-![]()
+![comp](./images/lecture10/eventlog2023-09-27.png) 
+![outputs](./images/lecture10/outputs2023-09-27.png)
 
 ```yaml
 Outputs:
@@ -707,6 +718,11 @@ Outputs:
   
 
 ### その後のデプロイ操作
+**nginxとunicornでサンプルアプリのデプロイ**
+- 復習を兼ねて構築内に必要なライブラリ等のインストールや設定アプリの書き込み  
+- スクリプトで上手くいかなかった部分は手動でコマンドを実行  
+- 手動部分は出来るだけ少なくProduction環境でデプロイ
+  
 ```
 # Production環境でデプロイする場合下記のコマンドを実行してください
 # 構築後すぐにアクセスするとまだコマンドを実行中の可能性があります。少し時間をおいてからアクセスしてください
@@ -727,3 +743,14 @@ sudo systemctl start nginx.service
 bin/rails unicorn:start
 
 ```
+
+**上記コマンド実行後、出力したALBのエンドポイントへアクセス**
+
+![app](./images/lecture10/app2023-09-27.png)
+![app2](./images/lecture10/savedata2023-09-27.png)
+![app3](./images/lecture10/app2-2023-09-27.png)
+
+**RDSとS3にデータが保存できていることを確認**
+
+![sql](./images/lecture10/sql2023-09-27.png)
+![s3obj](./images/lecture10/s3obj2023-09-27.png)
