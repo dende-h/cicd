@@ -20,8 +20,7 @@ rbenvのプラグインでRubyのバージョンを簡単にインストール�
 git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
 
 Ruby3.1.2をインストール
-rbenv install 3.1.2
-rbenv global 3.1.2
+rbenv install 3.1.2 && rbenv global 3.1.2
 
 インストールの確認
 ruby -v
@@ -160,7 +159,7 @@ Keyはrake secretで出力
 
 S3の接続に関するエラーもでていたので、一旦production.rbからコメントアウトしておく
 
-bin/setupをproduction環境で実施
+bin/setupをRAILS_ENV=production環境で実施
 成功
 NginxとUnicornをそれぞれスタート
 http:<EC2のIPアドレス>:80でアクセス
