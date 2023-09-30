@@ -1,5 +1,201 @@
 ## 第11回追加課題
 ### テストの実行
+**今回実行したテスト内容**
+```ruby
+require 'spec_helper'
+
+listen_port = 80
+
+# パッケージのインストール確認
+%w{
+  git make gcc-c++ patch openssl-devel libyaml-devel libffi-devel libicu-devel
+  libxml2 libxslt libxml2-devel libxslt-devel zlib-devel readline-devel
+  ImageMagick ImageMagick-devel epel-release nginx mysql-community-devel
+}.each do |pkg|
+  describe package(pkg) do
+    it { should be_installed }
+  end
+end
+
+# Mysqlインストール確認
+describe command('mysql --version') do
+  its(:stdout) { should match /mysql\s+Ver\s+8\.0\.34/ }
+end
+
+# unicornの確認
+describe package('unicorn') do
+  it { should be_installed.by('gem') }
+end
+
+# Nginxの起動状態
+describe service('nginx') do
+  it { should be_running }
+end
+
+#psコマンドを使ってUnicornのプロセスが実行しているかの確認をする
+#unicorn master
+describe command('ps aux | grep "unicorn master"') do
+  its(:stdout) { should match /unicorn master/ }
+end
+
+#unicorn worker
+describe command('ps aux | grep "unicorn worker" | wc -l') do
+  its(:stdout) { should match /[3-9]|[1-9]\d+/ } # 3以上の任意の数
+end
+
+# rubyのバージョン確認
+describe command('ruby -v') do
+  its(:stdout) { should match /ruby 3\.1\.2/ }
+end
+
+# bundlerのバージョン確認
+describe command('bundle -v') do
+  its(:stdout) { should match /Bundler version 2\.3\.14/ }
+end
+
+# Railsのバージョン確認
+describe command('rails -v') do
+  its(:stdout) { should match /Rails 7\.0\.4/ } # ここに期待するバージョンを記述
+end
+
+# Nodeのバージョン確認
+describe command('node -v') do
+  its(:stdout) { should match /v17\.9\.1/ } # ここに期待するバージョンを記述
+end
+
+# yarnのバージョン確認
+describe command('yarn -v') do
+  its(:stdout) { should match /1\.22\.19/ } # ここに期待するバージョンを記述
+end
+
+# ポートが開かれているか
+describe port(listen_port) do
+  it { should be_listening }
+end
+
+# 指定されたURLに対してHTTPリクエストを送信し、レスポンスのHTTPステータスコードが200（成功）であることを確認するテスト。レスポンスボディの内容は確認せず、HTTPコードを対象とする。
+describe command("curl http://13.231.108.50:#{listen_port}/ -o /dev/null -w '%{http_code}\n' -s") do
+  its(:stdout) { should match /^200$/ }
+end
+
+describe command("curl http://Lecture10-alb-1385515351.ap-northeast-1.elb.amazonaws.com/ -o /dev/null -w '%{http_code}\n' -s") do
+  its(:stdout) { should match /^200$/ }
+end
+
+# RDSのサーバー接続確認
+describe 'MySQL Command' do
+  host = 'lecture10-db.ckqxv4ruunm2.ap-northeast-1.rds.amazonaws.com'
+  command_string = "nc -zv #{host} 3306"
+
+  describe command(command_string) do
+    its(:exit_status) { should eq 0 }
+  end
+end
+
+# S3接続確認
+describe command("aws s3 ls s3://lecture10s3bk") do
+  its(:exit_status) { should eq 0 }
+end
+
+```
+**test結果**
+![test1](./images/lecture11/test-result2023-09-30.png)
+![test2](./images/lecture11/test-result2-2023-09-30.png)
+![test3](./images/lecture11/test-result3-2023-09-30.png)
+
+### 苦労した点
+unicornの起動や停止をunicorn.rakeファイルでtask定義していたが、Severspecをアプリケーションルートで設定したためRakefileとの競合や、Rails環境でServerspecが動作しない
+などが起こった。rake spec は効くがrake unicorn:stopは効かなかったりその逆が起こり解消するのに苦労した。  
+  
+**最終的なRakefileのコード**
+今回はRails環境においてRakefileを使おうとするとSeverspecが起動しなかったため、回避策としてUnicorn用のタスク内でのみRails環境を読み込むようにしたことで両方動作することができた。
+今回はRakefileのタスクがUnicornに関連するもののみのためこのような回避策が使えたが、実際の環境で様々なタスクがある場合、非常に工数がかかりそうなので、テストを動かす別サーバーを用意してsshを使った環境でテストをするのがよいと感じた。
+
+```ruby
+require 'rake'
+require 'rspec/core/rake_task'
+
+task :spec    => 'spec:all'
+task :default => :spec
+
+namespace :spec do
+  targets = []
+  Dir.glob('./spec/*').each do |dir|
+    next unless File.directory?(dir)
+    target = File.basename(dir)
+    target = "_#{target}" if target == "default"
+    targets << target
+  end
+
+  task :all     => targets
+  task :default => :all
+
+  targets.each do |target|
+    original_target = target == "_default" ? target[1..-1] : target
+    desc "Run serverspec tests to #{original_target}"
+    RSpec::Core::RakeTask.new(target.to_sym) do |t|
+      ENV['TARGET_HOST'] = original_target
+      t.pattern = "spec/#{original_target}/*_spec.rb"
+    end
+  end
+end
+
+namespace :unicorn do
+
+   # Tasks
+   desc "Start unicorn"
+   task(:start) {
+     require_relative 'config/environment'
+     config = Rails.root.join('config', 'unicorn.rb')
+     sh "unicorn -c #{config} -E production -D"
+   }
+
+   desc "Stop unicorn"
+   task(:stop) {
+     require_relative 'config/environment'
+     unicorn_signal :QUIT
+   }
+
+   desc "Restart unicorn with USR2"
+   task(:restart) {
+     require_relative 'config/environment'
+     unicorn_signal :USR2
+   }
+
+   desc "Increment number of worker processes"
+   task(:increment) {
+     require_relative 'config/environment'
+     unicorn_signal :TTIN
+   }
+
+   desc "Decrement number of worker processes"
+   task(:decrement) {
+     require_relative 'config/environment'
+     unicorn_signal :TTOU
+   }
+
+   desc "Unicorn pstree (depends on pstree command)"
+   task(:pstree) do
+     require_relative 'config/environment'
+     sh "pstree '#{unicorn_pid}'"
+   end
+
+   # Helpers
+   def unicorn_signal signal
+     Process.kill signal, unicorn_pid
+   end
+
+   def unicorn_pid
+     begin
+       File.read("/var/www/raisetech-live8-sample-app/tmp/unicorn.pid").to_i
+     rescue Errno::ENOENT
+       raise "Unicorn does not seem to be running"
+     end
+   end
+
+end
+```
+
 
 ### よく使用されるマッチャー
 
@@ -66,7 +262,6 @@ end
 ```
 `bundler`というgemがバージョン`1.10.5`でインストールされているかを検証。`.by('gem')`で、パッケージ管理システムとしてgemを指定する。
 
-もちろんです。初学者にとってより馴染みのあるサービス、例えば`httpd`（Apache HTTP Server）に置き換えてみます。
 
 #### 4.指定のサービスの状態確認
 ```ruby
