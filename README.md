@@ -61,9 +61,10 @@ lecture.mdファイルは課題を通して学んだことの証跡となりま�
     - コード化ができたら実行してみて、環境が自動で作られることを確認
 11. インフラのコード化、インフラのテスト【2023/09/30:提出済み】
     - ServerSpecのサンプルコードをカスタマイズしてテスト成功させる
-12. Teraform、DevOps、CI/CDツール【未提出】
+12. Teraform、DevOps、CI/CDツール【2023/10/02:提出済み】
     - CircleCIのサンプルコンフィグを正しく動作するようにリポジトリに組み込む
 13. Ansible、OpsWorks、CircleCI【未提出】
+    - CircleCIにAnsilbleやServerSpecの処理を追加
 14. ライブコーディング（Ansible〜CircleCI）【未提出】
 15. ライブコーディング（Ansible〜CircleCI）【未提出】
 16. 現場へ出ていくにあたって必要な技術と知識【未提出】
