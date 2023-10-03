@@ -22,3 +22,10 @@ module "load_balancer" {
   alb_sec_group_id  = module.security.alb_sec_group_id
   port = module.security.alb_ingress_port
 }
+
+module "compute" {
+  source = "../../modules/compute"
+  ec2_subnet1 = module.network.public_subnet1_id
+  sec_group_for_ec2 = module.security.ec2_sec_group_id
+  keypair_name = "RaisetechEC2KeyPair"
+}
