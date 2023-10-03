@@ -19,7 +19,7 @@ variable "igw_name" {
 variable "public_subnet_route_table_name" {
   description = "Name tag for the Public subnet route table"
   type        = string
-  default     = "terraform-RouteTable"
+  default     = "terraform-public-RouteTable"
 }
 
 variable "public_subnet1_cidr_block" {
@@ -37,11 +37,47 @@ variable "public_subnet2_cidr_block" {
 variable "public_subnet1_name" {
   description = "Name tag for the Public subnet1"
   type        = string
-  default     = "terraform-Subnet1"
+  default     = "terraform-public-subnet1"
 }
 
 variable "public_subnet2_name" {
   description = "Name tag for the Public subnet2"
   type        = string
-  default     = "terraform-Subnet2"
+  default     = "terraform-public-subnet2"
+}
+
+variable "praivate_subnet_route_table_name1"{
+  description = "Name tag for the praivate subnet route table"
+  type        = string
+  default     = "terraform-praiavte-RouteTable1"
+}
+
+variable "praivate_subnet_route_table_name2"{
+  description = "Name tag for the praivate subnet route table"
+  type        = string
+  default     = "terraform-praiavte-RouteTable2"
+}
+
+variable "private_subnet1_cidr_block"{
+description = "Cider block for praivate subnet1"
+type        = string
+default     = "10.0.0.128/28"
+}
+
+variable "private_subnet2_cidr_block"{
+description = "Cider block for praivate subnet2"
+type        = string
+default     = "10.0.0.144/28"
+}
+
+variable "praivate_subnet1_name"{
+  description = "Name tag for the private subnet1"
+  type        = string
+  default     = "terraform-praivate-subnet1"
+}
+
+variable "praivate_subnet2_name"{
+  description = "Name tag for the private subnet2"
+  type        = string
+  default     = "terraform-praivate-subnet2"
 }
