@@ -22,6 +22,8 @@ chocolateyを使用してインストール実施
     - ルートのmain.tfでモジュールを呼ぶ際に、他のモジュールのアウトプットを変数に渡す
 - CloudFormationでセキュリティグループのegressで指定したDestinationSecurityGroupIdはなく、source_security_group_idを使う
 - AWSのアクセスキーやシークレットキーはデフォルトで読み取る環境変数名で設定すれば、明示的に書かなくても読み取る
+- tfstateにリソースの状態を保存する。S3で管理できる。Dynamodbを利用して複数人環境で同時変更を防ぐロック機構を導入できる
+    - 今回はCircleCIで利用するためにtfstateをS3に保存するが、ロック機構は作成しない
 ### コンテナによるAnsilble実行環境の構築
 **Docker for windowsを使用する**
 

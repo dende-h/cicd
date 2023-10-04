@@ -7,7 +7,7 @@ variable "alb_name" {
 variable "alb_target" {
   description = "Name for the target-group"
   type        = string
-  default     = "terraform-target"
+  default     = "terraform-alb-target"
 }
 
 //他のモジュールで定義したvpc_idを受け取るための変数定義
