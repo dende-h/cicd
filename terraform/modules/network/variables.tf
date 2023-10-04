@@ -89,7 +89,7 @@ variable "aws_region" {
 }
 
 variable "vpc_endpoint_name" {
-  description = ""
+  description = "Endpoints for accessing S3 in EC2"
   type        = string
   default     = "terraform_vpc_endpoint"
 }

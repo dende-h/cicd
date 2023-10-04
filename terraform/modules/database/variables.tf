@@ -70,6 +70,6 @@ variable "rds_port" {
 }
 
 variable "rds_vpc_security_group_ids" {
-  description = ""
+  description = "RDS Security Groups"
   type        = list(string)
 }

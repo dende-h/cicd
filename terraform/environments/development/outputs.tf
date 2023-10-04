@@ -4,6 +4,6 @@ output "output_alb_endpoint" {
 }
 
 output "output_ec2_public_ip" {
-  description = ""
+  description = "Output EC2 public IP address"
   value       = module.compute.ec2_public_ip
 }
