@@ -8,22 +8,8 @@ executors:
 jobs:
   plan:
     executor: terraform
-    
     steps:
       - checkout
-      - run:
-          name: Install Git
-          command: |
-            apk add --no-cache git
-      - run:
-          name: Check for changes in terraform directory
-          command: |
-            # Check for changes in the terraform directory
-            CHANGED=$(git diff --name-only HEAD^ HEAD | grep "terraform/environments/development")
-            if [ -z "${CHANGED}" ]; then
-              echo "No changes in terraform directory. Skipping..."
-              exit 0
-            fi
       - run:
           name: Terraform Plan
           command: |
