@@ -18,7 +18,7 @@ jobs:
             CHANGED=$(git diff --name-only HEAD^ HEAD | grep "terraform/environments/development")
             if [ -z "$CHANGED" ]; then
               echo "No changes in terraform directory. Skipping..."
-              circleci-agent step halt
+              exit 0
             fi
       - run:
           name: Terraform Plan
