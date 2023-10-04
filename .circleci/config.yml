@@ -8,8 +8,18 @@ executors:
 jobs:
   plan:
     executor: terraform
+    
     steps:
       - checkout
+      - run:
+          name: Check for changes in terraform directory
+          command: |
+            # Check for changes in the terraform directory
+            CHANGED=$(git diff --name-only HEAD^ HEAD | grep "terraform/environments/development")
+            if [ -z "$CHANGED" ]; then
+              echo "No changes in terraform directory. Skipping..."
+              circleci-agent step halt
+            fi
       - run:
           name: Terraform Plan
           command: |
@@ -32,7 +42,7 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - plan
+      - plan          
       - apply:
           requires:
             - plan
