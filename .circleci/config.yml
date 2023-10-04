@@ -16,20 +16,11 @@ jobs:
           command: |
             apk add --no-cache git
       - run:
-          name: Debug git diff
-          command: |
-            git diff --name-only HEAD^ HEAD
-      - run:
-          name: Debug git log
-          command: |
-            git log -2
-
-      - run:
           name: Check for changes in terraform directory
           command: |
             # Check for changes in the terraform directory
             CHANGED=$(git diff --name-only HEAD^ HEAD | grep "terraform/environments/development")
-            if [ -z "$CHANGED" ]; then
+            if [ -z "${CHANGED}" ]; then
               echo "No changes in terraform directory. Skipping..."
               exit 0
             fi
