@@ -109,5 +109,21 @@ resource "aws_route_table_association" "terraform_associate_route_table_for_priv
   route_table_id = aws_route_table.terraform_private_subnet_route_table2.id
 }
 
+# Create VPC endpoint
+resource "aws_vpc_endpoint" "terraform_vpc_endpoint" {
+  vpc_id            = aws_vpc.terraform_vpc.id
+  service_name      = "com.amazonaws.${var.aws_region}.s3"
+  route_table_ids   = [aws_route_table.terraform_public_subnet_route_table.id]
+  vpc_endpoint_type = "Gateway"
+
+  tags = {
+    Name = var.vpc_endpoint_name
+  }
+}
+
+# Assuming you have defined the VPC, route table, and AWS region as variables or resources in your Terraform code
+# If not, you need to define resources for aws_vpc and aws_route_table or use appropriate variable references.
+
+
 
 
