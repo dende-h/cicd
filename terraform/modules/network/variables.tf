@@ -85,11 +85,11 @@ variable "praivate_subnet2_name" {
 variable "aws_region" {
   description = "The AWS region where resources will be created."
   type        = string
-  default     = "ap-northeast-1" 
+  default     = "ap-northeast-1"
 }
 
 variable "vpc_endpoint_name" {
   description = ""
-  type = string
-  default = "terraform_vpc_endpoint"
+  type        = string
+  default     = "terraform_vpc_endpoint"
 }
