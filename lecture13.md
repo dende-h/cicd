@@ -21,6 +21,7 @@ chocolateyを使用してインストール実施
     - 他のモジュールのoutputsを受け取る側はvariables.tfに変数として定義
     - ルートのmain.tfでモジュールを呼ぶ際に、他のモジュールのアウトプットを変数に渡す
 - CloudFormationでセキュリティグループのegressで指定したDestinationSecurityGroupIdはなく、source_security_group_idを使う
+- AWSのアクセスキーやシークレットキーはデフォルトで読み取る環境変数名で設定すれば、明示的に書かなくても読み取る
 ### コンテナによるAnsilble実行環境の構築
 **Docker for windowsを使用する**
 

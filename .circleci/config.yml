@@ -1,18 +1,61 @@
 version: 2.1
-orbs:
-  python: circleci/python@2.0.3
+
+executors:
+  terraform:
+    docker:
+      - image: hashicorp/terraform:1.5.7
+
 jobs:
-  cfn-lint:
-    executor: python/default
+  plan:
+    executor: terraform
     steps:
       - checkout
-      - run: pip install cfn-lint
       - run:
-          name: run cfn-lint
+          name: Terraform Plan
           command: |
-            cfn-lint -i W3002 -t cloudformation/*.yml
+            cd terraform\environments\development
+            terraform init
+            terraform plan
+
+  apply:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: Terraform Apply
+          command: |
+            cd terraform\environments\development
+            terraform init
+            terraform apply -auto-approve
 
 workflows:
-  raisetech:
+  version: 2
+  build_and_deploy:
     jobs:
-      - cfn-lint
+      - plan
+      - apply:
+          requires:
+            - plan
+         
+
+
+
+
+# version: 2.1
+# orbs:
+#   python: circleci/python@2.0.3
+# jobs:
+#   cfn-lint:
+#     executor: python/default
+#     steps:
+#       - checkout
+#       - run: pip install cfn-lint
+#       - run:
+#           name: run cfn-lint
+#           command: |
+#             cfn-lint -i W3002 -t cloudformation/*.yml
+
+# workflows:
+#   raisetech:
+#     jobs:
+#       - cfn-lint
