@@ -31,8 +31,12 @@ module "compute" {
 }
 
 module "database" {
-  source = "../../modules/database"
-  rds_password = "adminadmin"
-  subnet_ids = module.network.praivate_subnet_ids
+  source                     = "../../modules/database"
+  rds_password               = "adminadmin"
+  subnet_ids                 = module.network.praivate_subnet_ids
   rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
+}
+
+module "storage" {
+  source = "../../modules/storage"
 }
