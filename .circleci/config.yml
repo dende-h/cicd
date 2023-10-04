@@ -13,7 +13,7 @@ jobs:
       - run:
           name: Terraform Plan
           command: |
-            cd terraform\environments\development
+            cd ./terraform/environments/development
             terraform init
             terraform plan
 
