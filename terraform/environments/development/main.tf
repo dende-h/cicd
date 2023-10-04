@@ -26,6 +26,6 @@ module "load_balancer" {
 module "compute" {
   source = "../../modules/compute"
   ec2_subnet1 = module.network.public_subnet1_id
-  sec_group_for_ec2 = module.security.ec2_sec_group_id
+  sec_group_for_ec2 = [module.security.ec2_sec_group_id]
   keypair_name = "RaisetechEC2KeyPair"
 }
