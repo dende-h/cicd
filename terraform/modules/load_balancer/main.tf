@@ -40,7 +40,7 @@ resource "aws_lb_listener" "listener_resource" {
   port              = var.port
   protocol          = "HTTP"
 
-  default_action {  //ロードバランサーが受信したトラフィックをどのように処理するかを指定
+  default_action { //ロードバランサーが受信したトラフィックをどのように処理するかを指定
     type             = "forward"
     target_group_arn = aws_lb_target_group.terraform_target_group.arn
   }

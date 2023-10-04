@@ -1,7 +1,7 @@
 variable "my_ip" {
-    description = "my local PC ip"
-    type        = list(string)
-    default     = ["122.131.47.188/32","106.73.101.33/32"]
+  description = "my local PC ip"
+  type        = list(string)
+  default     = ["122.131.47.188/32", "106.73.101.33/32"]
 }
 
 variable "alb_sec_group_name" {

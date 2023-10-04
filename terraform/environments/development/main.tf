@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "ap-northeast-1" 
+  region = "ap-northeast-1"
 }
 
 module "network" {
@@ -15,17 +15,24 @@ module "security" {
 }
 
 module "load_balancer" {
-  source = "../../modules/load_balancer"
-  vpc_id = module.network.vpc_id
+  source            = "../../modules/load_balancer"
+  vpc_id            = module.network.vpc_id
   public_subnet1_id = module.network.public_subnet1_id
   public_subnet2_id = module.network.public_subnet2_id
   alb_sec_group_id  = module.security.alb_sec_group_id
-  port = module.security.alb_ingress_port
+  port              = module.security.alb_ingress_port
 }
 
 module "compute" {
-  source = "../../modules/compute"
-  ec2_subnet1 = module.network.public_subnet1_id
+  source            = "../../modules/compute"
+  ec2_subnet1       = module.network.public_subnet1_id
   sec_group_for_ec2 = [module.security.ec2_sec_group_id]
-  keypair_name = "RaisetechEC2KeyPair"
+  keypair_name      = "RaisetechEC2KeyPair"
+}
+
+module "database" {
+  source = "../../modules/database"
+  rds_password = "adminadmin"
+  subnet_ids = module.network.praivate_subnet_ids
+  rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
 }

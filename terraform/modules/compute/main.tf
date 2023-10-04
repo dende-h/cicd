@@ -4,13 +4,13 @@ data "aws_availability_zones" "available" {
 
 # EC2 IAM Role
 resource "aws_iam_role" "terraform_ec2_iam_role_for_s3" {
-  name               = var.role_name
-  path               = "/"
+  name = var.role_name
+  path = "/"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
-        Effect    = "Allow",
+        Effect = "Allow",
         Principal = {
           Service = "ec2.amazonaws.com"
         },
@@ -35,20 +35,20 @@ resource "aws_network_interface" "terraform-ec2-network-interface" {
 
 # EC2 Instance
 resource "aws_instance" "terraform_ec2" {
-  key_name               = var.keypair_name
-  instance_type          = var.instance_type
-  ami                    = var.ami
-  iam_instance_profile   = aws_iam_instance_profile.terraform_ec2_instance_profile.name
-  monitoring             = false
-  disable_api_termination = false
+  key_name                    = var.keypair_name
+  instance_type               = var.instance_type
+  ami                         = var.ami
+  iam_instance_profile        = aws_iam_instance_profile.terraform_ec2_instance_profile.name
+  monitoring                  = false
+  disable_api_termination     = false
   associate_public_ip_address = true
   network_interface {
-    device_index          = 0
-    network_interface_id  = aws_network_interface.terraform-ec2-network-interface.id
-    
+    device_index         = 0
+    network_interface_id = aws_network_interface.terraform-ec2-network-interface.id
+
   }
 
-  availability_zone =  element(data.aws_availability_zones.available.names, 0)
+  availability_zone = element(data.aws_availability_zones.available.names, 0)
 
   root_block_device {
 

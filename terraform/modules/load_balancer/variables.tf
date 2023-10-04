@@ -28,12 +28,12 @@ variable "public_subnet2_id" {
 }
 
 variable "alb_sec_group_id" {
-    description = "alb security group id"
-    type        = string
+  description = "alb security group id"
+  type        = string
 }
 
 variable "port" {
-    description = "listener and target-group port"
-    type        = number
-    default     = 80
+  description = "listener and target-group port"
+  type        = number
+  default     = 80
 }

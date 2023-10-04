@@ -11,7 +11,7 @@ resource "aws_security_group" "terraform_sec_gp_for_alb" {
   }
 
   tags = {
-    Name =var.alb_sec_group_name
+    Name = var.alb_sec_group_name
   }
 }
 
@@ -33,20 +33,20 @@ resource "aws_security_group" "terraform_sec_gp_for_ec2" {
 }
 
 resource "aws_security_group_rule" "security_group_ingress_for_ec2" {
-  type        = "ingress"
-  from_port   = var.alb_ingress_port
-  to_port     = var.alb_ingress_port
-  protocol    = "tcp"
-  security_group_id = aws_security_group.terraform_sec_gp_for_ec2.id
+  type                     = "ingress"
+  from_port                = var.alb_ingress_port
+  to_port                  = var.alb_ingress_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.terraform_sec_gp_for_ec2.id
   source_security_group_id = aws_security_group.terraform_sec_gp_for_alb.id
 }
 
 resource "aws_security_group_rule" "security_group_egress_for_alb" {
-  type        = "egress"
-  from_port   = var.ec2_ingress_port
-  to_port     = var.ec2_ingress_port
-  protocol    = "tcp"
-  security_group_id = aws_security_group.terraform_sec_gp_for_alb.id
+  type                     = "egress"
+  from_port                = var.ec2_ingress_port
+  to_port                  = var.ec2_ingress_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.terraform_sec_gp_for_alb.id
   source_security_group_id = aws_security_group.terraform_sec_gp_for_ec2.id
 }
 
@@ -56,9 +56,9 @@ resource "aws_security_group" "terraform_sec_gp_for_rds" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = var.rds_ingress_port
-    to_port     = var.rds_ingress_port
-    protocol    = "tcp"
+    from_port       = var.rds_ingress_port
+    to_port         = var.rds_ingress_port
+    protocol        = "tcp"
     security_groups = [aws_security_group.terraform_sec_gp_for_ec2.name]
   }
 
@@ -68,10 +68,10 @@ resource "aws_security_group" "terraform_sec_gp_for_rds" {
 }
 
 resource "aws_security_group_rule" "security_group_egress_for_rds" {
-  type        = "egress"
-  from_port   = var.rds_ingress_port
-  to_port     = var.rds_ingress_port
-  protocol    = "tcp"
-  security_group_id = aws_security_group.terraform_sec_gp_for_rds.id
+  type                     = "egress"
+  from_port                = var.rds_ingress_port
+  to_port                  = var.rds_ingress_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.terraform_sec_gp_for_rds.id
   source_security_group_id = aws_security_group.terraform_sec_gp_for_ec2.id
 }
