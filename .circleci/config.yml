@@ -24,7 +24,7 @@ jobs:
       - run:
           name: Terraform Apply
           command: |
-            cd terraform\environments\development
+            cd ./terraform/environments/development
             terraform init
             terraform apply -auto-approve
 
