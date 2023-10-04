@@ -13,7 +13,7 @@ variable "policy_arns" {
 variable "profile_name" {
   description = "ec2 profile name"
   type        = string
-  default     = "terraform-ec2Instance-profile"
+  default     = "terraform-ec2-instance-profile"
 }
 
 variable "instance_type" {

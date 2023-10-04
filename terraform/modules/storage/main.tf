@@ -7,10 +7,6 @@ resource "aws_s3_bucket" "terraform_s3_bucket" {
   }
 }
 
-resource "aws_s3_bucket_acl" "terraform_s3_bucket_acl" {
-  bucket = aws_s3_bucket.terraform_s3_bucket.bucket
-  acl    = "private"
-}
 
 # Create Bucket Policy
 resource "aws_s3_bucket_policy" "terraform_bucket_policy" {
