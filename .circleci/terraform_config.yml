@@ -48,9 +48,9 @@ jobs:
       - checkout
       - run: pip install cfn-lint
       - run:
-        name: run cfn-lint
-        command: |
-          cfn-lint -i W3002 -t cloudformation/*.yml
+          name: run cfn-lint
+          command: |
+            cfn-lint -i W3002 -t cloudformation/*.yml
 
 workflows:
   # when pipeline parameter, run-development-terraform-build is true, the
