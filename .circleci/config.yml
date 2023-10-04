@@ -12,6 +12,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Git
+          command: |
+            apk add --no-cache git
+      - run:
           name: Check for changes in terraform directory
           command: |
             # Check for changes in the terraform directory
