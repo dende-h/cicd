@@ -31,6 +31,7 @@ resource "aws_iam_instance_profile" "terraform_ec2_instance_profile" {
 resource "aws_network_interface" "terraform-ec2-network-interface" {
   subnet_id       = var.ec2_subnet1
   security_groups = var.sec_group_for_ec2
+  
 }
 
 # EC2 Instance
@@ -41,11 +42,10 @@ resource "aws_instance" "terraform_ec2" {
   iam_instance_profile        = aws_iam_instance_profile.terraform_ec2_instance_profile.name
   monitoring                  = false
   disable_api_termination     = false
-  associate_public_ip_address = true
+  
   network_interface {
     device_index         = 0
     network_interface_id = aws_network_interface.terraform-ec2-network-interface.id
-
   }
 
   availability_zone = element(data.aws_availability_zones.available.names, 0)

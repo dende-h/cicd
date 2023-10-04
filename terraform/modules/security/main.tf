@@ -59,7 +59,7 @@ resource "aws_security_group" "terraform_sec_gp_for_rds" {
     from_port       = var.rds_ingress_port
     to_port         = var.rds_ingress_port
     protocol        = "tcp"
-    security_groups = [aws_security_group.terraform_sec_gp_for_ec2.name]
+    security_groups = [aws_security_group.terraform_sec_gp_for_ec2.id]
   }
 
   tags = {
