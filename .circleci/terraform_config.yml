@@ -1,0 +1,73 @@
+version: 2.1           
+
+orbs:
+  python: circleci/python@2.0.3
+
+parameters:
+  run-development-terraform-build:
+    type: boolean
+    default: false
+  run-modules-terraform-build:
+    type: boolean
+    default: false
+  run-raisetech-sample-config:
+    type: boolean
+    default: false     
+
+executors:
+  terraform:
+    docker:
+      - image: hashicorp/terraform:1.5.7
+
+jobs:
+  plan:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: Terraform Plan
+          command: |
+            cd ./terraform/environments/development
+            terraform init
+            terraform plan
+
+  apply:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: Terraform Apply
+          command: |
+            cd ./terraform/environments/development
+            terraform init
+            terraform apply -auto-approve
+  
+  cfn-lint:
+    executor: python/default
+    steps:
+      - checkout
+      - run: pip install cfn-lint
+      - run:
+        name: run cfn-lint
+        command: |
+          cfn-lint -i W3002 -t cloudformation/*.yml
+
+workflows:
+  # when pipeline parameter, run-development-terraform-build is true, the
+  # job is triggered.
+  develop-terraform-build:
+    when: 
+      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>]
+    jobs:
+      - plan          
+      - apply:
+          requires:
+            - plan
+
+  # when pipeline parameter, run-raisetech-sample-config is true, the
+  # job is triggered.
+  sample-jobs:
+    when: << pipeline.parameters.run-raisetech-sample-config >>
+    jobs:
+       - cfn-lint
+
