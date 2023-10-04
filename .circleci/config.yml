@@ -26,7 +26,7 @@ jobs:
           command: |
             cd ./terraform/environments/development
             terraform init
-            terraform apply -auto-approve
+            terraform destroy -auto-approve
 
 workflows:
   version: 2
