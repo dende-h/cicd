@@ -25,7 +25,7 @@ variable "instance_type" {
 variable "ami" {
     description = "ec2 ami"
     type = string
-    default "ami-07d6bd9a28134d3b3"
+    default = "ami-07d6bd9a28134d3b3"
 }
 
 variable "ec2_subnet1" {
@@ -41,12 +41,6 @@ variable "sec_group_for_ec2" {
 variable "keypair_name" {
     description = "The EC2 Key Pair to allow SSH access to the instance"
     type = string
-}
-
-variable "device_name" {
-    description = "Device name for block device mapping"
-    type = string
-    default = "/dev/xvda"
 }
 
 variable "volume_type" {

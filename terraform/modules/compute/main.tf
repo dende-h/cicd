@@ -1,3 +1,6 @@
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
 # EC2 IAM Role
 resource "aws_iam_role" "terraform_ec2_iam_role_for_s3" {
@@ -24,6 +27,12 @@ resource "aws_iam_instance_profile" "terraform_ec2_instance_profile" {
   role = aws_iam_role.terraform_ec2_iam_role_for_s3.name
 }
 
+#  7.create a network interface with an ip in the subnet that created in step 4
+resource "aws_network_interface" "terraform-ec2-network-interface" {
+  subnet_id       = var.ec2_subnet1
+  security_groups = var.sec_group_for_ec2
+}
+
 # EC2 Instance
 resource "aws_instance" "terraform_ec2" {
   key_name               = var.keypair_name
@@ -32,18 +41,17 @@ resource "aws_instance" "terraform_ec2" {
   iam_instance_profile   = aws_iam_instance_profile.terraform_ec2_instance_profile.name
   monitoring             = false
   disable_api_termination = false
-
+  associate_public_ip_address = true
   network_interface {
     device_index          = 0
-    associate_public_ip_address = true
-    subnet_id             = var.ec2_subnet
-    security_groups       = var.sec_group_for_ec2
+    network_interface_id  = aws_network_interface.terraform-ec2-network-interface.id
+    
   }
 
   availability_zone =  element(data.aws_availability_zones.available.names, 0)
 
   root_block_device {
-    device_name = var.device_name
+
     volume_type = var.volume_type
     volume_size = var.volume_size
   }
