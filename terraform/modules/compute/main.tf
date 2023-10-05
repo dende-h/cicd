@@ -57,11 +57,11 @@ resource "aws_instance" "terraform_ec2" {
   }
 
 
-  user_data = <<-EOF
+  user_data = <<EOF
               #!/bin/bash
-              yum update -y
-              yum install -y git
-              yum install -y mysql
+              sudo yum update -y
+              sudo yum install -y git
+              sudo yum install -y mysql
               EOF
 
   tags = {

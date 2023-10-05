@@ -38,7 +38,7 @@ chocolateyを使用してインストール実施
     - Project settings > Advanced -> Dynamic config using setup workflowsで設定の変更をしないと使えないので注意
     - configファイルを分けて、動的にワークフローを作成できる  
         **実装例**
-        .circleci/config.yml
+        **.circleci/config.yml**
         ```yaml
         version: 2.1
 
@@ -71,7 +71,7 @@ chocolateyを使用してインストール実施
                 # configuration itself.
                 config-path: .circleci/terraform_config.yml
         ```
-        .circleci/terraform_config.yml
+        **.circleci/terraform_config.yml**
         ```yml
 
         version: 2.1           
@@ -150,7 +150,7 @@ chocolateyを使用してインストール実施
 
 ### コンテナによるAnsilble実行環境の構築
 **Docker for windowsを使用する**
-‐ Docker for windowsのインストール～AnsibleでHelloworldを表示する
+- Docker for windowsのインストール～AnsibleでHelloworldを表示する
     ```
     # AmazonLinuxのImageを取得
     docker pull amazonlinux 
@@ -165,8 +165,8 @@ chocolateyを使用してインストール実施
 
     # ansibleバージョン確認
     ansible --version
-　　
-　　# sshkeyを生成
+
+    # sshkeyを生成
     yum install -y openssh-clients
     ssh-keygen
 
@@ -191,4 +191,49 @@ chocolateyを使用してインストール実施
     PLAY RECAP *************************************************************************************************************
     localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
     ```
-    
+
+- AnsibleでEC2内部にNginxをインストールしてみる
+    - 外部から接続用のhosts設定を追加
+        **ansible/inventories/development/hosts**
+        ```
+        [webserver]
+        <EC2 public ip> ansible_ssh_user=ec2-user ansible_ssh_private_key_file=/tmp/<EC2piarkey>.pem
+        ```
+          
+
+     - Dockerコンテナ内にPemKeyがなかったため外部からDockerへコピー(操作はDocker外部から行う) ～Playbook実行   
+        ```
+        # コンテナIDの確認
+        docker ps
+        
+        #ローカルからDockerコンテナ内にKeyをコピー(永続化していなければDockerコンテナを終了するとコンテナ内のデータは消去される) 
+        docker cp /path/to/your_private_key.pem your_container_id_or_name:/path/in/container/your_key.pem
+        # 立ち上げ時にマウントしていたら上記操作は不要となる
+
+        # Keyの権限を適正化(755など適正でない権限のKeyはブロックされることがある)
+        chmod 0600 /tmp/RaisetechEC2KeyPair.pem
+
+        # Playbookの実行
+        ansible-playbook -i <path to hosts> ./ansible/playbooks/playbook.yml
+
+        # 実行結果
+        bash-5.2# ansible-playbook -i /ansible/inventories/development/hosts /ansible/playbooks/playbook.yml
+
+        PLAY [Install Nginx] ***************************************************************************************************
+
+        TASK [Gathering Facts] *************************************************************************************************
+        [WARNING]: Platform linux on host 13.231.107.81 is using the discovered Python interpreter at /usr/bin/python3.7, but
+        future installation of another Python interpreter could change the meaning of that path. See
+        https://docs.ansible.com/ansible-core/2.15/reference_appendices/interpreter_discovery.html for more information.
+        ok: [13.231.107.81]
+
+        TASK [Install Nginx repository] ****************************************************************************************
+        changed: [13.231.107.81]
+
+        TASK [Install Nginx] ***************************************************************************************************
+        changed: [13.231.107.81]
+
+        PLAY RECAP *************************************************************************************************************
+        13.231.107.81              : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+        ```
+        ![nginx-install](./images/lecture13/Nginx-install2023-10-05.png)
