@@ -27,6 +27,13 @@ resource "aws_security_group" "terraform_sec_gp_for_ec2" {
     cidr_blocks = var.my_ip
   }
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = var.ec2_sec_group_name
   }

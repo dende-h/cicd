@@ -26,6 +26,7 @@ chocolateyを使用してインストール実施
     - 今回はCircleCIで利用するためにtfstateをS3に保存するが、ロック機構は作成しない
 - backendの設定によりS3に保存したstateをinitで取り込むことによって異なる環境でも状態を共有できる
     - ローカルでapplyした場合とCircleCIでapplyした場合で差異がないように整合性を保てる
+- アウトバウンドルールを明記しないとアウトバウンドルールが全拒否になる
 
 **CircleCIメモ**
 - terraformを動かすためterraformをインストールした環境をDockerで作成してコマンドを実行する
