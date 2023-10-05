@@ -34,6 +34,10 @@ resource "aws_network_interface" "terraform-ec2-network-interface" {
   
 }
 
+resource "aws_eip" "terraform-eip" {
+  instance = aws_instance.terraform_ec2.id
+}
+
 # EC2 Instance
 resource "aws_instance" "terraform_ec2" {
   key_name                    = var.keypair_name
