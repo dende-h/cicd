@@ -149,6 +149,45 @@ chocolateyを使用してインストール実施
 
 ### コンテナによるAnsilble実行環境の構築
 **Docker for windowsを使用する**
+‐ Docker for windowsのインストール～AnsibleでHelloworldを表示する
+    ```
+    # AmazonLinuxのImageを取得
+    docker pull amazonlinux 
 
-‐ Docker for windowsのインストール
+    # コンテナを作成＋ローカル環境のAnsible用ディレクトリをマウント
+    docker run -it --name ansible_container -v C:/Users/<user-name>/<project-name>/ansible:/ansible amazonlinux /bin/bash
+
+    # 環境アップデートとPythonインストール、ansibleインストール
+    yum update -y
+    yum install -y python3 python3-pip
+    pip3 install ansible
+
+    # ansibleバージョン確認
+    ansible --version
+　　
+　　# sshkeyを生成
+    yum install -y openssh-clients
+    ssh-keygen
+
+    # ansibleを試しに実行=>環境内にHelloworldを表示するだけ
+    ansible-playbook ./ansible/playbooks/playbook.yml
+
+    # 表示結果
+    [WARNING]: No inventory was parsed, only implicit localhost is available
+    [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match
+    'all'
+
+    PLAY [Hello World Playbook] ********************************************************************************************
+
+    TASK [Gathering Facts] *************************************************************************************************
+    ok: [localhost]
+
+    TASK [Print Hello, World!] *********************************************************************************************
+    ok: [localhost] => {
+        "msg": "Hello, World!"
+    }
+
+    PLAY RECAP *************************************************************************************************************
+    localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+    ```
     
