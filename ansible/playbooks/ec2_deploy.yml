@@ -1,0 +1,82 @@
+---
+- name: Setup EC2 instance
+  hosts: webserver
+  become: true
+  tasks:
+    - name: Enable EPEL repository using amazon-linux-extras
+      command:
+        cmd: amazon-linux-extras install epel -y
+
+    - name: Install necessary packages
+      yum:
+        name:
+          - make
+          - gcc-c++
+          - patch
+          - openssl-devel
+          - libyaml-devel
+          - libffi-devel
+          - libicu-devel
+          - libxml2
+          - libxslt
+          - libxml2-devel
+          - libxslt-devel
+          - zlib-devel
+          - readline-devel
+          - ImageMagick
+          - ImageMagick-devel
+          - epel-release
+        state: present
+
+    - name: Remove mariadb-libs
+      yum:
+        name: mariadb-libs
+        state: absent
+    
+    - name: Install MySQL 8.0 community release RPM
+      command:
+        cmd: yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+    
+    - name: Install mysql-community-devel
+      yum:
+        name: mysql-community-devel
+        state: present
+
+    - name: Clone rbenv repository
+      git:
+        repo: https://github.com/rbenv/rbenv.git
+        dest: /home/ec2-user/.rbenv
+      become: false
+
+    - name: Update .bash_profile for rbenv
+      lineinfile:
+        path: /home/ec2-user/.bash_profile
+        line: "{{ item }}"
+      with_items:
+        - 'export PATH="$HOME/.rbenv/bin:$PATH"'
+        - 'eval "$(rbenv init -)"'
+      become: false
+
+    - name: Clone ruby-build for rbenv
+      git:
+        repo: https://github.com/rbenv/ruby-build.git
+        dest: /home/ec2-user/.rbenv/plugins/ruby-build
+      become: false
+
+    - name: Clone nvm repository
+      git:
+        repo: https://github.com/creationix/nvm.git
+        dest: /home/ec2-user/.nvm
+      become: false
+
+    - name: Update .bashrc for nvm
+      lineinfile:
+        path: /home/ec2-user/.bashrc
+        line: "{{ item }}"
+      with_items:
+        - 'export NVM_DIR="$HOME/.nvm"'
+        - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+        - '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"'
+      become: false
+
+
