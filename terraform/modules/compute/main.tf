@@ -61,6 +61,7 @@ resource "aws_instance" "terraform_ec2" {
     #!/bin/bash
     sudo yum update -y
     sudo yum install -y git
+    sudo yum install -y mysql
   EOF
 
   tags = {
