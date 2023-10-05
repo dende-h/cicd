@@ -1,12 +1,21 @@
 ---
 - name: Setup EC2 instance
-  hosts: webserver
+  hosts: EC2server
   become: true
   tasks:
-    - name: Enable EPEL repository using amazon-linux-extras
-      command:
-        cmd: amazon-linux-extras install epel -y
-
+    - name: Add EPEL repository
+      yum_repository:
+        name: epel
+        description: EPEL YUM repo
+      # リポジトリのベースURL
+        baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+        gpgcheck: yes #GPG署名のチェックを行うかどうか
+      # GPGキーのURL
+        gpgkey: https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+        enabled: yes #リポジトリが有効かどうか
+        state: present
+      
+      # 必要なパッケージのインストール
     - name: Install necessary packages
       yum:
         name:
@@ -26,49 +35,65 @@
           - ImageMagick
           - ImageMagick-devel
           - epel-release
-        state: present
+        state: present #削除する場合はabsent
 
+      # デフォルトのmariadbの削除
     - name: Remove mariadb-libs
       yum:
         name: mariadb-libs
         state: absent
     
+  # mysql-community-develインストール
+    - name: Check if MySQL 8.0 community release RPM is installed
+      command:
+        cmd: rpm -q mysql80-community-release-el7-5
+      register: rpm_check   #コマンドの実行結果を変数rpm_checkに保存
+      failed_when: false    #失敗しても以降の処理を続行
+      changed_when: false   #どの結果も変更があったとはみなさない
+
     - name: Install MySQL 8.0 community release RPM
       command:
         cmd: yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
-    
+      when: rpm_check.rc != 0 #全タスクの結果によってこのタスクを実行するか制御
+
     - name: Install mysql-community-devel
       yum:
         name: mysql-community-devel
         state: present
 
+      # rbenvリポジトリをClone
     - name: Clone rbenv repository
       git:
         repo: https://github.com/rbenv/rbenv.git
         dest: /home/ec2-user/.rbenv
       become: false
 
+      # 設定ファイルにPath設定追加
     - name: Update .bash_profile for rbenv
-      lineinfile:
-        path: /home/ec2-user/.bash_profile
-        line: "{{ item }}"
-      with_items:
+      lineinfile: #特定の行をファイルに追加または置換する
+        path: /home/ec2-user/.bash_profile #記述先を指定
+        #regexp: 指定された正規表現に一致する行がファイル内に存在する場合、lineの内容に置き換え
+        line: "{{ item }}" # with_itemsに定義した内容が入る
+      with_items: #同じ行がなければ追記する
         - 'export PATH="$HOME/.rbenv/bin:$PATH"'
         - 'eval "$(rbenv init -)"'
       become: false
-
+      
+      # ruby-buildをClone
     - name: Clone ruby-build for rbenv
       git:
         repo: https://github.com/rbenv/ruby-build.git
         dest: /home/ec2-user/.rbenv/plugins/ruby-build
       become: false
 
+      # nvmリポジトリをClone
     - name: Clone nvm repository
       git:
         repo: https://github.com/creationix/nvm.git
         dest: /home/ec2-user/.nvm
       become: false
 
+      # 設定ファイルにPath設定追加
     - name: Update .bashrc for nvm
       lineinfile:
         path: /home/ec2-user/.bashrc
@@ -78,5 +103,54 @@
         - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
         - '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"'
       become: false
+
+      # Ruby3.1.2のインストール
+    - name: Install Ruby 3.1.2 using rbenv
+      shell:
+        cmd: source /home/ec2-user/.bash_profile && rbenv install 3.1.2
+      async: 3600
+      poll: 60
+      become: false
+      creates: /home/ec2-user/.rbenv/versions/3.1.2
+
+      # Ruby 3.1.2をグローバルバージョンにセット
+    - name: Set Ruby 3.1.2 as global version using rbenv
+      shell:
+        cmd: source /home/ec2-user/.bash_profile && rbenv global 3.1.2
+      become: false
+
+      # node17.9.1をインストール
+    - name: Install Node.js v17.9.1 using nvm
+      shell:
+        cmd: source /home/ec2-user/.bashrc && nvm install v17.9.1
+      async: 3600
+      poll: 60
+      become: false
+      creates: /home/ec2-user/.nvm/versions/node/v17.9.1
+      
+      # nodeのグローバルバージョンセット
+    - name: Set Node.js v17.9.1 as default version using nvm
+      shell:
+        cmd: source /home/ec2-user/.bashrc && nvm alias default v17.9.1
+      become: false
+      environment:
+        NVM_DIR: "/home/ec2-user/.nvm"
+
+      # yarnのグローバルインストール
+    - name: Install yarn globally
+      npm:
+        name: yarn
+        global: yes
+        state: present
+      become: false
+
+      # bundlerのインストール
+    - name: Install bundler gem
+      gem:
+        name: bundler
+        user_install: no
+        state: present
+      become: false
+
 
 
