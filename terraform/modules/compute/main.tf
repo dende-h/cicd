@@ -58,11 +58,10 @@ resource "aws_instance" "terraform_ec2" {
 
 
   user_data = <<EOF
-              #!/bin/bash
-              sudo yum update -y
-              sudo yum install -y git
-              sudo yum install -y mysql
-              EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install -y git
+  EOF
 
   tags = {
     Name = var.ec2_name
