@@ -108,10 +108,11 @@
     - name: Install Ruby 3.1.2 using rbenv
       shell:
         cmd: source /home/ec2-user/.bash_profile && rbenv install 3.1.2
+        creates: /home/ec2-user/.rbenv/versions/3.1.2
       async: 3600
       poll: 60
       become: false
-      creates: /home/ec2-user/.rbenv/versions/3.1.2
+      
 
       # Ruby 3.1.2をグローバルバージョンにセット
     - name: Set Ruby 3.1.2 as global version using rbenv
@@ -123,10 +124,11 @@
     - name: Install Node.js v17.9.1 using nvm
       shell:
         cmd: source /home/ec2-user/.bashrc && nvm install v17.9.1
+        creates: /home/ec2-user/.nvm/versions/node/v17.9.1
       async: 3600
       poll: 60
       become: false
-      creates: /home/ec2-user/.nvm/versions/node/v17.9.1
+      
       
       # nodeのグローバルバージョンセット
     - name: Set Node.js v17.9.1 as default version using nvm
