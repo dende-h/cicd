@@ -7,3 +7,14 @@ output "output_ec2_public_ip" {
   description = "Output EC2 public IP address"
   value       = module.compute.ec2_public_ip
 }
+
+output "rds_endpoint" {
+  description = "The endpoint for the RDS instance"
+  value       = module.database.rds_endpoint
+}
+
+output "rds_password" {
+  description = "The password for the RDS instance"
+  value       = module.database.rds_password
+  sensitive   = true
+}

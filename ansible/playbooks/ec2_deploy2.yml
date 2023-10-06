@@ -1,0 +1,31 @@
+---
+- name: Setup EC2 instance
+  hosts: EC2server
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Download tfstate from S3
+      aws_s3:
+        bucket: my-s3-bucket-terraform-state
+        object: development/terraform.tfstate
+        dest: /ansible/downloaded/terraform.tfstate
+        mode: get
+      delegate_to: localhost
+
+    - name: Get RDS Endpoint from Terraform output
+      command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_endpoint"
+      register: rds_endpoint
+      delegate_to: localhost
+
+    - name: Get RDS Password from Terraform output
+      command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_password"
+      register: rds_password
+      delegate_to: localhost
+
+    - name: Generate database.yml
+      template:
+        src: templates/database.yml.j2
+        dest:  /var/www/raisetech-live8-sample-app/config/database.yml
+      vars:
+        db_host: "{{ rds_endpoint.stdout }}"
+        db_password: "{{ rds_password.stdout }}"

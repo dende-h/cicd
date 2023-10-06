@@ -1,20 +1,19 @@
 ---
 - name: Setup EC2 instance
   hosts: EC2server
+  gather_facts: true
   become: true
   tasks:
-    - name: Add EPEL repository
-      yum_repository:
-        name: epel
-        description: EPEL YUM repo
-      # リポジトリのベースURL
-        baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
-        gpgcheck: yes #GPG署名のチェックを行うかどうか
-      # GPGキーのURL
-        gpgkey: https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
-        enabled: yes #リポジトリが有効かどうか
-        state: present
-      
+    - name: Enable EPEL via amazon-linux-extras
+      command: amazon-linux-extras install epel -y
+      args:
+        creates: /etc/yum.repos.d/epel.repo
+    
+    - name: Update all packages to the latest version
+      yum:
+        name: '*'
+        state: latest
+
       # 必要なパッケージのインストール
     - name: Install necessary packages
       yum:
@@ -46,14 +45,14 @@
   # mysql-community-develインストール
     - name: Check if MySQL 8.0 community release RPM is installed
       command:
-        cmd: rpm -q mysql80-community-release-el7-5
+        cmd: rpm -q mysql80-community-release-el7-10
       register: rpm_check   #コマンドの実行結果を変数rpm_checkに保存
       failed_when: false    #失敗しても以降の処理を続行
       changed_when: false   #どの結果も変更があったとはみなさない
 
     - name: Install MySQL 8.0 community release RPM
       command:
-        cmd: yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+        cmd: yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-10.noarch.rpm
       when: rpm_check.rc != 0 #前タスクの結果によってこのタスクを実行するか制御
 
     - name: Install mysql-community-devel
@@ -95,7 +94,7 @@
           args:
             creates: /home/ec2-user/.rbenv/versions/3.1.2
           async: 3600
-          poll: 60
+          poll: 10
         
       # bundlerのインストール
         - name: Install bundler gem
@@ -132,7 +131,7 @@
           args:
             creates: /home/ec2-user/.nvm/versions/node/v17.9.1
           async: 3600
-          poll: 60
+          poll: 10
      
           # yarnのグローバルインストール
         - name: Install yarn globally
@@ -158,14 +157,37 @@
         update: yes
       become: false
 
-    - name: Install nginx release package
-      yum:
-        name: http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
-        state: present
-      
-    - name: Install nginx
+    # 2. Nginxのインストール
+    - name: Install Nginx
       yum:
         name: nginx
         state: present
-      
 
+    # 3. Nginxサービスの起動と自動起動の設定
+    - name: Ensure Nginx is started and enabled on boot
+      systemd:
+        name: nginx
+        state: started
+        enabled: true
+
+    # 4. (オプション) Nginxの設定ファイルの配置 (変更がある場合のみ)
+    - name: Copy Nginx configuration file
+      copy:
+        src: /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf
+        dest: /etc/nginx/conf.d/default.conf
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: yes
+      notify: restart nginx
+
+
+
+
+
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
