@@ -133,17 +133,39 @@
             creates: /home/ec2-user/.nvm/versions/node/v17.9.1
           async: 3600
           poll: 60
+     
+          # yarnのグローバルインストール
+        - name: Install yarn globally
+          npm:
+            name: yarn
+            global: yes
+            state: present
       become: false
 
+    - name: Ensure /var/www directory exists
+      file:
+        path: /var/www
+        state: directory
+        mode: '0755'
+        owner: ec2-user
+        group: ec2-user
 
-      # yarnのグローバルインストール
-    - name: Install yarn globally
-      npm:
-        name: yarn
-        global: yes
+    - name: Clone repository using git module
+      git:
+        repo: https://github.com/dende-h/raisetech-live8-sample-app.git
+        dest: /var/www/raisetech-live8-sample-app
+        clone: yes
+        update: yes
+      become: false
+
+    - name: Install nginx release package
+      yum:
+        name: http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
         state: present
-      become: false
-
-
-
+      
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+      
 
