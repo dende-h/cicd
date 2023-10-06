@@ -4,6 +4,12 @@
   gather_facts: true
   become: true
   tasks:
+    - name: Ensure download directory exists
+      file:
+        path: /ansible/downloaded
+        state: directory
+      delegate_to: localhost
+      
     - name: Download tfstate from S3
       aws_s3:
         bucket: my-s3-bucket-terraform-state
@@ -24,7 +30,7 @@
 
     - name: Generate database.yml
       template:
-        src: templates/database.yml.j2
+        src: /ansible/templates/database.yml.j2
         dest:  /var/www/raisetech-live8-sample-app/config/database.yml
       vars:
         db_host: "{{ rds_endpoint.stdout }}"
