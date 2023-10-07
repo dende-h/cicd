@@ -239,90 +239,13 @@ chocolateyを使用してインストール実施
         ![nginx-install](./images/lecture13/Nginx-install2023-10-05.png)
 
 Dockerにした変更メモ
-        PS C:\Users\yuu-mem11> Docker ps
-        CONTAINER ID   IMAGE         COMMAND       CREATED        STATUS       PORTS     NAMES
-        6f8fead738e7   amazonlinux   "/bin/bash"   30 hours ago   Up 8 hours             ansible_container
-        PS C:\Users\yuu-mem11> docker cp C:/Users/yuu-mem11/.aws 6f8fead738e7:/root/
-        Successfully copied 2.56kB to 6f8fead738e7:/root/
-        PS C:\Users\yuu-mem11>
-
-bash-5.2# wget https://releases.hashicorp.com/terraform/1.0.5/terraform_1.0.5_linux_amd64.zip
-bash: wget: command not found
-bash-5.2# curl --version
-curl 8.2.1 (x86_64-amazon-linux-gnu) libcurl/8.2.1 OpenSSL/3.0.8 zlib/1.2.11 libidn2/2.3.2 nghttp2/1.55.1
-Release-Date: 2023-07-26
-Protocols: file ftp ftps http https
-Features: alt-svc AsynchDNS GSS-API HSTS HTTP2 HTTPS-proxy IDN IPv6 Kerberos Largefile libz SPNEGO SSL threadsafe UnixSockets
+docker cp C:/Users/<user-name>/.aws <dockerID>:/root/
 bash-5.2# curl -O https://releases.hashicorp.com/terraform/1.1.0/terraform_1.1.0_linux_amd64.zip
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 17.8M  100 17.8M    0     0   9.8M      0  0:00:01  0:00:01 --:--:--  9.8M
-bash-5.2# unzip terraform_1.1.0_linux_amd64.zip
-bash: unzip: command not found
 bash-5.2# yum install unzip -y
-Last metadata expiration check: 1 day, 5:59:08 ago on Thu Oct  5 01:59:55 2023.
-Dependencies resolved.
-========================================================================================================================
- Package                Architecture            Version                              Repository                    Size
-========================================================================================================================
-Installing:
- unzip                  x86_64                  6.0-57.amzn2023.0.2                  amazonlinux                  182 k
-
-Transaction Summary
-========================================================================================================================
-Install  1 Package
-
-Total download size: 182 k
-Installed size: 392 k
-Downloading Packages:
-unzip-6.0-57.amzn2023.0.2.x86_64.rpm                                                    1.5 MB/s | 182 kB     00:00
-------------------------------------------------------------------------------------------------------------------------
-Total                                                                                   273 kB/s | 182 kB     00:00
-Running transaction check
-Transaction check succeeded.
-Running transaction test
-Transaction test succeeded.
-Running transaction
-  Preparing        :                                                                                                1/1
-  Installing       : unzip-6.0-57.amzn2023.0.2.x86_64                                                               1/1
-  Running scriptlet: unzip-6.0-57.amzn2023.0.2.x86_64                                                               1/1
-  Verifying        : unzip-6.0-57.amzn2023.0.2.x86_64                                                               1/1
-
-Installed:
-  unzip-6.0-57.amzn2023.0.2.x86_64
-
-Complete!
 bash-5.2# unzip terraform_1.1.0_linux_amd64.zip
-Archive:  terraform_1.1.0_linux_amd64.zip
-  inflating: terraform
 bash-5.2# mv terraform /usr/local/bin/
 bash-5.2# terraform version
 Terraform v1.1.0
-on linux_amd64
-
-Your version of Terraform is out of date! The latest version
-is 1.6.0. You can update by downloading from https://www.terraform.io/downloads.html
-
 bash-5.2# pip3 install boto3 botocore
-Collecting boto3
-  Downloading boto3-1.28.61-py3-none-any.whl (135 kB)
-     |████████████████████████████████| 135 kB 2.5 MB/s
-Collecting botocore
-  Downloading botocore-1.31.61-py3-none-any.whl (11.2 MB)
-     |████████████████████████████████| 11.2 MB 7.8 MB/s
-Collecting s3transfer<0.8.0,>=0.7.0
-  Downloading s3transfer-0.7.0-py3-none-any.whl (79 kB)
-     |████████████████████████████████| 79 kB 6.8 MB/s
-Collecting jmespath<2.0.0,>=0.7.1
-  Downloading jmespath-1.0.1-py3-none-any.whl (20 kB)
-Collecting urllib3<1.27,>=1.25.4
-  Downloading urllib3-1.26.17-py2.py3-none-any.whl (143 kB)
-     |████████████████████████████████| 143 kB 10.6 MB/s
-Collecting python-dateutil<3.0.0,>=2.1
-  Downloading python_dateutil-2.8.2-py2.py3-none-any.whl (247 kB)
-     |████████████████████████████████| 247 kB 10.4 MB/s
-Collecting six>=1.5
-  Downloading six-1.16.0-py2.py3-none-any.whl (11 kB)
-Installing collected packages: six, urllib3, python-dateutil, jmespath, botocore, s3transfer, boto3
-Successfully installed boto3-1.28.61 botocore-1.31.61 jmespath-1.0.1 python-dateutil-2.8.2 s3transfer-0.7.0 six-1.16.0 urllib3-1.26.17
+
 
