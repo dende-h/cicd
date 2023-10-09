@@ -153,6 +153,7 @@
       git:
         repo: https://github.com/dende-h/raisetech-live8-sample-app.git
         dest: /var/www/raisetech-live8-sample-app
+        force: yes
         clone: yes
         update: yes
       become: false

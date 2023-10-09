@@ -14,8 +14,8 @@ default: &default
   encoding: utf8mb4
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: root
-  password: <%= ENV['{{ db_password }}'] %>
-  host: {{ db_host }}
+  host: {{ db_host | regex_replace('^"', '') | regex_replace('"$', '') | quote }}
+  password: {{ db_password | regex_replace('^"', '') | regex_replace('"$', '') | quote }}
 
 development:
   <<: *default

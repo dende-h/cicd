@@ -35,6 +35,14 @@ resource "aws_lb_target_group" "terraform_target_group" {
   }
 }
 
+
+resource "aws_lb_target_group_attachment" "alb-attach" {
+  count            = 2
+  target_group_arn = aws_lb_target_group.terraform_target_group.arn
+  target_id        = var.target_ec2
+  port             = 80
+}
+
 resource "aws_lb_listener" "listener_resource" {
   load_balancer_arn = aws_lb.terraform_alb.arn
   port              = var.port
@@ -43,5 +51,20 @@ resource "aws_lb_listener" "listener_resource" {
   default_action { //ロードバランサーが受信したトラフィックをどのように処理するかを指定
     type             = "forward"
     target_group_arn = aws_lb_target_group.terraform_target_group.arn
+  }
+}
+
+resource "aws_lb_listener_rule" "tg2" {
+  listener_arn = aws_alb_listener.listener_resource.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.terraform_target_group.arn
+  }
+
+  condition {
+    field  = "path-pattern"
+    values = ["/target/*"]
   }
 }

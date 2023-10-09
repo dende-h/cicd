@@ -37,3 +37,8 @@ variable "port" {
   type        = number
   default     = 80
 }
+
+variable "target_ec2" {
+  description = "ec2 id"
+  type        = string
+}

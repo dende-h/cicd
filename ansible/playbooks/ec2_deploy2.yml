@@ -9,7 +9,7 @@
         path: /ansible/downloaded
         state: directory
       delegate_to: localhost
-      
+
     - name: Download tfstate from S3
       aws_s3:
         bucket: my-s3-bucket-terraform-state
@@ -20,18 +20,85 @@
 
     - name: Get RDS Endpoint from Terraform output
       command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_endpoint"
-      register: rds_endpoint
+      register: rds_endpoint_raw
       delegate_to: localhost
+
+    - name: Extract just the RDS endpoint (without port)
+      set_fact:
+        rds_endpoint: "{{ rds_endpoint_raw.stdout.split(':')[0] }}"
 
     - name: Get RDS Password from Terraform output
       command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_password"
       register: rds_password
       delegate_to: localhost
 
+    # - name: Download tfstate from S3
+    #   aws_s3:
+    #     bucket: my-s3-bucket-terraform-state
+    #     object: development/terraform.tfstate
+    #     dest: /ansible/downloaded/terraform.tfstate
+    #     mode: get
+    #   delegate_to: localhost
+
+    # - name: Get RDS Endpoint from Terraform output
+    #   command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_endpoint"
+    #   register: rds_endpoint
+    #   delegate_to: localhost
+
+    # - name: Get RDS Password from Terraform output
+    #   command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_password"
+    #   register: rds_password
+    #   delegate_to: localhost
+
     - name: Generate database.yml
       template:
         src: /ansible/templates/database.yml.j2
         dest:  /var/www/raisetech-live8-sample-app/config/database.yml
       vars:
-        db_host: "{{ rds_endpoint.stdout }}"
+        db_host: "{{ rds_endpoint }}"
         db_password: "{{ rds_password.stdout }}"
+
+    - name: Generate storage.yml
+      template:
+        src: /ansible/templates/storage.yml.j2
+        dest:  /var/www/raisetech-live8-sample-app/config/storage.yml
+
+    # - name: Check if the env file exists
+    #   stat:
+    #     path: /var/www/raisetech-live8-sample-app/config/application.yml
+    #   register: env_file_exists_check
+
+    # - name: Generate application.yml
+    #   template:
+    #     src: /ansible/templates/application.yml.j2
+    #     dest:  /var/www/raisetech-live8-sample-app/config/application.yml
+    #   when: not env_file_exists_check.stat.exists
+
+    - name: compile app
+      block:
+
+      - name: Bundle install
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app && bundle install"
+
+      - name: Generate secret key
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  bundle exec rails secret RAILS_ENV=production"
+        register: secret_env
+
+      - name: Replace secret key 
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app && export SECRET_KEY_BASE={{ secret_env.stdout }} && RAILS_ENV=production bin/setup "
+
+      - name: Clear Rails cache
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  RAILS_ENV=production rake tmp:cache:clear"
+
+      - name: Precompile assets
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  RAILS_ENV=production rake assets:precompile"
+      become: false
+
+    - name: Start nginx service
+      service:
+        name: nginx
+        state: started
+
+    - name: Start unicorn
+      shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  bin/rails unicorn:start"
+      become: false

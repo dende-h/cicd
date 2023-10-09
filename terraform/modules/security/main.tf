@@ -50,8 +50,8 @@ resource "aws_security_group_rule" "security_group_ingress_for_ec2" {
 
 resource "aws_security_group_rule" "security_group_egress_for_alb" {
   type                     = "egress"
-  from_port                = var.ec2_ingress_port
-  to_port                  = var.ec2_ingress_port
+  from_port                = var.alb_ingress_port
+  to_port                  = var.alb_ingress_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.terraform_sec_gp_for_alb.id
   source_security_group_id = aws_security_group.terraform_sec_gp_for_ec2.id

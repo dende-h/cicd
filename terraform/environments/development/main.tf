@@ -21,6 +21,7 @@ module "load_balancer" {
   public_subnet2_id = module.network.public_subnet2_id
   alb_sec_group_id  = module.security.alb_sec_group_id
   port              = module.security.alb_ingress_port
+  target_ec2        = module.compute.ec2_instance_id
 }
 
 module "compute" {
