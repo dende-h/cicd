@@ -55,7 +55,7 @@ resource "aws_lb_listener" "listener_resource" {
 }
 
 resource "aws_lb_listener_rule" "tg2" {
-  listener_arn = aws_alb_listener.listener_resource.arn
+  listener_arn = aws_lb_listener.listener_resource.arn
   priority     = 100
 
   action {
