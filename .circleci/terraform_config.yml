@@ -69,5 +69,5 @@ workflows:
   sample-jobs:
     when: << pipeline.parameters.run-raisetech-sample-config >>
     jobs:
-       - cfn-lint
+      - cfn-lint
 
