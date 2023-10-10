@@ -36,7 +36,7 @@
           - epel-release
         state: present #削除する場合はabsent
 
-      # デフォルトのmariadbの削除
+      # デフォルトで入っているmariadbの削除
     - name: Remove mariadb-libs
       yum:
         name: mariadb-libs
