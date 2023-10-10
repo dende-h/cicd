@@ -53,7 +53,7 @@
     - name: Install MySQL 8.0 community release RPM
       command:
         cmd: yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-10.noarch.rpm
-      when: rpm_check.rc != 0 #前タスクの結果によってこのタスクを実行するか制御
+      when: rpm_check.rc != 0 #前タスクで変数に保存した結果によってこのタスクを実行するか制御
 
     - name: Install mysql-community-devel
       yum:

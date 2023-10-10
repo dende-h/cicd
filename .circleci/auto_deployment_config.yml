@@ -120,6 +120,9 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
+      - run: 
+          name: install the boto3
+          command: pip3 install boto3 botocore 
       - run:
           name: Add EC2 to known hosts
           command: ssh-keyscan 18.177.168.5 >> ~/.ssh/known_hosts
