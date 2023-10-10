@@ -24,7 +24,7 @@ resource "aws_security_group" "terraform_sec_gp_for_ec2" {
     from_port   = var.ec2_ingress_port
     to_port     = var.ec2_ingress_port
     protocol    = "tcp"
-    cidr_blocks = var.my_ip
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
