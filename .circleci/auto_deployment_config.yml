@@ -11,6 +11,9 @@ parameters:
   run-modules-terraform-build:
     type: boolean
     default: false
+  run-ansible:
+    type: boolean
+    default: false
   run-raisetech-sample-config:
     type: boolean
     default: false     
@@ -84,14 +87,14 @@ workflows:
   # job is triggered.
   terraform-build-and-deploy:
     when: 
-      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>]
+      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>]
     jobs:
       - plan          
       - apply:
           requires:
             - plan
       - ansible-playbook:
-          version: "2.15.4"
+          version: "2.10.7"
           playbook:  /ansible/playbooks/ec2_deploy.yml
           requires:
             - apply
