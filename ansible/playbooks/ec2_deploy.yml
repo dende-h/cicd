@@ -14,7 +14,7 @@
         name: '*'
         state: latest
 
-      # 必要なパッケージのインストール
+      # 必要パッケージのインストール
     - name: Install necessary packages
       yum:
         name:

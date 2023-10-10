@@ -80,6 +80,9 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
+      - run:
+          name: Add EC2 to known hosts
+          command: ssh-keyscan 18.177.168.5 >> ~/.ssh/known_hosts
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
