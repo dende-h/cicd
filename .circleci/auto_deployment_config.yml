@@ -95,7 +95,7 @@ workflows:
             - plan
       - ansible-playbook:
           version: "2.10.7"
-          playbook:  /ansible/playbooks/ec2_deploy.yml
+          playbook:  ./ansible/playbooks/ec2_deploy.yml
           requires:
             - apply
 
