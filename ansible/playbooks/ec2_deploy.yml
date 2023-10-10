@@ -158,20 +158,20 @@
         update: yes
       become: false
 
-    # 2. Nginxのインストール
+    # Nginxのインストール
     - name: Install Nginx
       yum:
         name: nginx
         state: present
 
-    # 3. Nginxサービスの起動と自動起動の設定
+    # Nginxサービスの起動と自動起動の設定
     - name: Ensure Nginx is started and enabled on boot
       systemd:
         name: nginx
         state: started
         enabled: true
 
-    # 4. (オプション) Nginxの設定ファイルの配置 (変更がある場合のみ)
+    # (オプション) Nginxの設定ファイルの配置 (変更がある場合のみ)
     - name: Copy Nginx configuration file
       copy:
         src: /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf
