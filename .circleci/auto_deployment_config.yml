@@ -57,7 +57,13 @@ jobs:
           Ansible version
         type: string
         default: ''
-
+      inventory:
+        description: |
+          Ansible inventory file. The default value must be empty,
+          so do not store any value to this environment variable.
+          The data must be registered in base64 format
+        type: env_var_name
+        default: NONEXISTENT_ANSIBLE_INVENTORY
       playbook:
         description: |
           The path of Ansible playbook
@@ -70,6 +76,7 @@ jobs:
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
+          inventory: <<parameters.inventory>>
           playbook: <<parameters.playbook>>
 
   cfn-lint:
@@ -95,6 +102,7 @@ workflows:
             - plan
       - ansible-playbook:
           version: "2.10.7"
+          inventory: ANSIBLE_PLAYBOOK_HOSTS
           playbook:  ./ansible/playbooks/ec2_deploy.yml
           requires:
             - apply
