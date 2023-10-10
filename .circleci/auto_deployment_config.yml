@@ -68,17 +68,21 @@ jobs:
         description: |
           The path of Ansible playbook
         type: string
+      private-key:
+        description: |
+          SSH private key file. The default value must be empty,
+          so do not store any value to this environment variable.
+          The data must be registered in base64 format
+        type: env_var_name
+        default: NONEXISTENT_ANSIBLE_SSH_KEY
     steps:
       - checkout
-      - add_ssh_keys:
-              fingerprints:
-                - 9a:f2:be:29:25:ac:ea:4c:19:76:b0:bc:bc:9b:e9:7b
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
           inventory: <<parameters.inventory>>
           playbook: <<parameters.playbook>>
-
+          private-key: <<parameters.private-key>>
   cfn-lint:
     executor: python/default
     steps:
@@ -104,6 +108,7 @@ workflows:
           version: "2.10.7"
           inventory: ANSIBLE_PLAYBOOK_HOSTS
           playbook:  ./ansible/playbooks/ec2_deploy.yml
+          private-key: AWS_PAIR_KEY
           requires:
             - apply
 
