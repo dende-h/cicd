@@ -41,7 +41,6 @@ jobs:
             cd ./terraform/environments/development
             terraform init
             terraform apply -auto-approve 
-
   
   cfn-lint:
     executor: python/default

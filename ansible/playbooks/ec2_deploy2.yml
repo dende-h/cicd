@@ -1,5 +1,5 @@
 ---
-- name: Setup EC2 instance
+- name: Setup Rails app
   hosts: EC2server
   gather_facts: true
   become: true
@@ -63,29 +63,34 @@
         src: /ansible/templates/storage.yml.j2
         dest:  /var/www/raisetech-live8-sample-app/config/storage.yml
 
-    # - name: Check if the env file exists
-    #   stat:
-    #     path: /var/www/raisetech-live8-sample-app/config/application.yml
-    #   register: env_file_exists_check
+    - name: Generate application.yml
+      template:
+        src: /ansible/templates/application.yml.j2
+        dest:  /var/www/raisetech-live8-sample-app/config/application.yml
 
-    # - name: Generate application.yml
-    #   template:
-    #     src: /ansible/templates/application.yml.j2
-    #     dest:  /var/www/raisetech-live8-sample-app/config/application.yml
-    #   when: not env_file_exists_check.stat.exists
+    - name: Generate the systemd file
+      template:
+        src: /ansible/templates/systemd.yml.j2
+        dest: /etc/systemd/system/unicorn.service
 
     - name: compile app
       block:
 
       - name: Bundle install
         shell: bash -lc "cd /var/www/raisetech-live8-sample-app && bundle install"
-
+      
       - name: Generate secret key
         shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  bundle exec rails secret RAILS_ENV=production"
         register: secret_env
 
-      - name: Replace secret key 
-        shell: bash -lc "cd /var/www/raisetech-live8-sample-app && export SECRET_KEY_BASE={{ secret_env.stdout }} && RAILS_ENV=production bin/setup "
+      - name: Replace secret key in application.yml
+        lineinfile: #特定の行をファイルに追加または置換する
+          path: /var/www/raisetech-live8-sample-app/config/application.yml #記述先を指定
+          regexp: <will-be-replaced-key>
+          line: "SECRET_KEY_BASE: {{ secret_env.stdout }}" # with_itemsに定義した内容が入る
+
+      - name: Rails app setup
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app && RAILS_ENV=production bin/setup "
 
       - name: Clear Rails cache
         shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  RAILS_ENV=production rake tmp:cache:clear"
@@ -99,6 +104,9 @@
         name: nginx
         state: started
 
-    - name: Start unicorn
-      shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  bin/rails unicorn:start"
-      become: false
+    - name: Ensure unicorn is started
+      service:
+        name: unicorn
+        state: started
+        enabled: yes
+

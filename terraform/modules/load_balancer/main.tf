@@ -53,18 +53,3 @@ resource "aws_lb_listener" "listener_resource" {
     target_group_arn = aws_lb_target_group.terraform_target_group.arn
   }
 }
-
-resource "aws_lb_listener_rule" "tg2" {
-  listener_arn = aws_lb_listener.listener_resource.arn
-  priority     = 100
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.terraform_target_group.arn
-  }
-
-  condition {
-    field  = "path-pattern"
-    values = ["/target/*"]
-  }
-}
