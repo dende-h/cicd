@@ -103,7 +103,7 @@
       service:
         name: nginx
         state: started
-
+    # Unicornの起動
     - name: Ensure unicorn is started
       service:
         name: unicorn

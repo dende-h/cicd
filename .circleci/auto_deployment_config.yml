@@ -77,6 +77,10 @@ jobs:
         default: NONEXISTENT_ANSIBLE_SSH_KEY
     steps:
       - checkout
+      - run:
+          name: Add EC2 Instance Public Key
+          command: |
+            echo "$EC2_PUBLIC_KEY" >> ~/.ssh/known_hosts
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
