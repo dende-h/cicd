@@ -7,15 +7,6 @@ setup: true
 # the path of an updated fileset
 orbs:
   path-filtering: circleci/path-filtering@1.0.0
-  continuation: circleci/continuation@0.1.2
-
-jobs:
-  deploy:
-    executor: continuation/default
-    steps:
-      - checkout # checkout code
-      - continuation/continue:
-          configuration_path: .circleci/ansible_config.yml
 
 workflows:
   # the always-run workflow is always triggered, regardless of the pipeline parameters.
@@ -36,10 +27,8 @@ workflows:
           # path filtering and pipeline parameter value updates are
           # complete. In this case, we are using the parent dynamic
           # configuration itself.
-          config-path: .circleci/terraform_config.yml
-      - deploy:
-          requires:
-            - check-updated-files
+          config-path: .circleci/auto_deployment_config.yml
+
       
 
 

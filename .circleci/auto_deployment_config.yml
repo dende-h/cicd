@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   python: circleci/python@2.0.3
+  ansible: orbss/ansible-playbook@0.0.5
 
 parameters:
   run-development-terraform-build:
@@ -18,6 +19,9 @@ executors:
   terraform:
     docker:
       - image: hashicorp/terraform:1.5.7
+  ansible:
+    docker:
+      - image: circleci/python
 
 jobs:
   plan:
@@ -41,7 +45,30 @@ jobs:
             cd ./terraform/environments/development
             terraform init
             terraform apply -auto-approve 
-  
+
+  ansible-playbook:
+    executor: ansible
+    parameters:
+      version:
+        description: |
+          Ansible version
+        type: string
+        default: ''
+
+      playbook:
+        description: |
+          The path of Ansible playbook
+        type: string
+    steps:
+      - checkout
+      - add_ssh_keys:
+              fingerprints:
+                - 9a:f2:be:29:25:ac:ea:4c:19:76:b0:bc:bc:9b:e9:7b
+      - ansible/install:
+          version: <<parameters.version>>
+      - ansible/playbook:
+          playbook: <<parameters.playbook>>
+
   cfn-lint:
     executor: python/default
     steps:
@@ -55,7 +82,7 @@ jobs:
 workflows:
   # when pipeline parameter, run-development-terraform-build is true, the
   # job is triggered.
-  develop-terraform-build:
+  terraform-build-and-deploy:
     when: 
       or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>]
     jobs:
@@ -63,6 +90,11 @@ workflows:
       - apply:
           requires:
             - plan
+      - ansible-playbook:
+          version: "2.15.4"
+          playbook:  /ansible/playbooks/ec2_deploy.yml
+          requires:
+            - apply
 
   # when pipeline parameter, run-raisetech-sample-config is true, the
   # job is triggered.
