@@ -98,7 +98,7 @@
       - name: Precompile assets
         shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  RAILS_ENV=production rake assets:precompile"
       become: false
-
+    # nginxの起動
     - name: Start nginx service
       service:
         name: nginx

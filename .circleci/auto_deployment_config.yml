@@ -89,6 +89,46 @@ jobs:
           inventory: <<parameters.inventory>>
           playbook: <<parameters.playbook>>
           private-key: <<parameters.private-key>>
+  sample-app-deploy:
+    executor: ansible
+    parameters:
+      version:
+        description: |
+          Ansible version
+        type: string
+        default: ''
+      inventory:
+        description: |
+          Ansible inventory file. The default value must be empty,
+          so do not store any value to this environment variable.
+          The data must be registered in base64 format
+        type: env_var_name
+        default: NONEXISTENT_ANSIBLE_INVENTORY
+      playbook:
+        description: |
+          The path of Ansible playbook
+        type: string
+      private-key:
+        description: |
+          SSH private key file. The default value must be empty,
+          so do not store any value to this environment variable.
+          The data must be registered in base64 format
+        type: env_var_name
+        default: NONEXISTENT_ANSIBLE_SSH_KEY
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "${KEY_FINGERPRINT}"
+      - run:
+          name: Add EC2 to known hosts
+          command: ssh-keyscan 18.177.168.5 >> ~/.ssh/known_hosts
+      - ansible/install:
+          version: <<parameters.version>>
+      - ansible/playbook:
+          inventory: <<parameters.inventory>>
+          playbook: <<parameters.playbook>>
+          private-key: <<parameters.private-key>>
   cfn-lint:
     executor: python/default
     steps:
@@ -117,6 +157,13 @@ workflows:
           private-key: AWS_PAIR_KEY
           requires:
             - apply
+      - sample-app-deploy:
+          version: "2.10.7"
+          inventory: ANSIBLE_PLAYBOOK_HOSTS
+          playbook:  ./ansible/playbooks/ec2_deploy2.yml
+          private-key: AWS_PAIR_KEY
+          requires:
+            - ansible-playbook
 
   # when pipeline parameter, run-raisetech-sample-config is true, the
   # job is triggered.
