@@ -1,4 +1,5 @@
 provider "aws" {
+  // リージョン
   region = "ap-northeast-1"
 }
 
