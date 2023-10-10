@@ -59,7 +59,7 @@
       yum:
         name: mysql-community-devel
         state: present
-
+    # rbenvを使ったRubyのセットアップ
     - name: Setup ruby using rbenv
       block:
         - name: Clone rbenv repository
