@@ -49,10 +49,10 @@ jobs:
             terraform init
             terraform apply -auto-approve 
             # Terraformのアウトプットを取得
-            mkdir /tmp
-            echo $(terraform output -json) > /tmp/terraform-outputs.json
+            - run: mkdir -p /tmp/workspace
+            echo $(terraform output -json) > /tmp/workspace/terraform-outputs.json
       - persist_to_workspace:
-          root: tmp
+          root: workspace
           paths: 
             - terraform-outputs.json
 

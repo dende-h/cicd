@@ -13,18 +13,18 @@
       debug:
         msg: "{{ lookup('env', 'TF_OUTPUT_EC2_IP) }}"
     
-    - name: Use Terraform output RDS endpoint
-      debug:
-        msg: "{{ tf_outputs.rds_endpoint.value }}"
+    # - name: Use Terraform output RDS endpoint
+    #   debug:
+    #     msg: "{{ tf_outputs.rds_endpoint.value }}"
 
-    - name: Use Terraform output RDS password
-      debug:
-        msg: "{{ tf_outputs.rds_password.value }}"
+    # - name: Use Terraform output RDS password
+    #   debug:
+    #     msg: "{{ tf_outputs.rds_password.value }}"
 
-    - name: Debug PYTHONPATH
-      debug:
-        msg: "{{ lookup('env', 'PYTHONPATH') }}"
-      delegate_to: localhost
+    # - name: Debug PYTHONPATH
+    #   debug:
+    #     msg: "{{ lookup('env', 'PYTHONPATH') }}"
+    #   delegate_to: localhost
 
     - name: Ensure download directory exists
       file:
