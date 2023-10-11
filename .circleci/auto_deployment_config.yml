@@ -159,7 +159,7 @@ jobs:
             echo 'export TF_OUTPUT_RDS_PASSWORD=$(jq -r ".rds_password.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
       - run:
           name: Add EC2 to known hosts
-          command: ssh-keyscan 18.177.168.5 >> ~/.ssh/known_hosts
+          command: ssh-keyscan ${TF_OUTPUT_EC2_IP} >> ~/.ssh/known_hosts
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
