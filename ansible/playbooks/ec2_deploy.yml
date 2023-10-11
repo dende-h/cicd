@@ -182,11 +182,6 @@
         remote_src: yes
       notify: restart nginx
 
-
-
-
-
-
   handlers:
     - name: restart nginx
       systemd:

@@ -20,13 +20,6 @@ resource "aws_security_group" "terraform_sec_gp_for_ec2" {
   description = var.ec2_sec_group_description
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port   = var.ec2_ingress_port
-    to_port     = var.ec2_ingress_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -40,6 +33,15 @@ resource "aws_security_group" "terraform_sec_gp_for_ec2" {
 }
 
 resource "aws_security_group_rule" "security_group_ingress_for_ec2" {
+  type              = "ingress"
+  from_port         = var.ec2_ingress_port
+  to_port           = var.ec2_ingress_port
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.terraform_sec_gp_for_ec2.id
+}
+
+resource "aws_security_group_rule" "security_group_ingress_for_ec2_from_alb" {
   type                     = "ingress"
   from_port                = var.alb_ingress_port
   to_port                  = var.alb_ingress_port
