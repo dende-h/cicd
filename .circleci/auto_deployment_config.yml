@@ -33,6 +33,7 @@ executors:
       - image: circleci/python
 
 jobs:
+# infrastructure as code
   plan:
     executor: terraform
     steps:
@@ -62,7 +63,7 @@ jobs:
           paths: 
             - terraform-outputs.json
 
-
+  # setup-ec2
   ansible-playbook:
     executor: ansible
     parameters:
@@ -104,7 +105,7 @@ jobs:
           playbook: <<parameters.playbook>>
           private-key: <<parameters.private-key>>
 
-
+  # app-deploy
   sample-app-deploy:
     executor: ansible
     parameters:
@@ -166,7 +167,7 @@ jobs:
           command: |
             cfn-lint -i W3002 -t cloudformation/*.yml
 
-
+  # server-test
   server_spec:
     docker:
       - image: ruby:2.7
