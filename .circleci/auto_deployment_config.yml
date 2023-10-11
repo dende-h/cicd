@@ -20,6 +20,9 @@ parameters:
   run-circleci: 
     type: boolean
     default: false 
+  run-serverspec:
+    type: boolean
+    default: false 
 
 executors:
   terraform:
@@ -100,6 +103,8 @@ jobs:
           inventory: <<parameters.inventory>>
           playbook: <<parameters.playbook>>
           private-key: <<parameters.private-key>>
+
+
   sample-app-deploy:
     executor: ansible
     parameters:
@@ -161,12 +166,42 @@ jobs:
           command: |
             cfn-lint -i W3002 -t cloudformation/*.yml
 
+
+  server_spec:
+    docker:
+      - image: ruby:2.7
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "${KEY_FINGERPRINT}"
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Set SSH Key Path
+          command: echo 'export SSH_PRIVATE_KEY_PATH=~/.ssh/id_rsa' >> $BASH_ENV
+      - run:
+          name: Set environment variable from JSON
+          command: |
+            echo 'export TARGET_HOST=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+      - run:
+          name: Setup Serverspec
+          command: |
+            cd ./ServerTest
+            gem install serverspec rake
+      - run:
+          name: Run Serverspec Tests
+          command: |
+            cd ./ServerTest
+            rake spec
+
+
 workflows:
   # when pipeline parameter, run-development-terraform-build is true, the
   # job is triggered.
   terraform-build-and-deploy:
     when: 
-      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>]
+      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>,<< pipeline.parameters.run-serverspec >>]
     jobs:
       - plan          
       - apply:
@@ -186,6 +221,9 @@ workflows:
           private-key: AWS_PAIR_KEY
           requires:
             - ansible-playbook
+      - server_spec:
+          requires:
+            - sample-app-deploy
 
   # when pipeline parameter, run-raisetech-sample-config is true, the
   # job is triggered.
