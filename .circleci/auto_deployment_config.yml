@@ -122,7 +122,10 @@ jobs:
             - "${KEY_FINGERPRINT}"
       - run: 
           name: install the boto3
-          command: pip3 install boto3 botocore 
+          command: pip3 install boto3 
+      - run:
+          name: Set PYTHONPATH
+          command: echo 'export PYTHONPATH=$PYTHONPATH:/home/circleci/.local/lib/python3.10/site-packages' >> $BASH_ENV
       - run:
           name: Check Python and boto3
           command: |
