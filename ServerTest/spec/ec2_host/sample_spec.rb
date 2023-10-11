@@ -91,6 +91,6 @@ describe 'MySQL Command' do
 end
 
 # S3接続確認
-describe command("aws s3 ls s3://lecture10s3bk") do
+describe command("aws s3 ls s3://terraform-amazon-s3") do
   its(:exit_status) { should eq 0 }
 end
