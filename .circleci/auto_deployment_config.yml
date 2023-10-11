@@ -178,6 +178,9 @@ jobs:
       - attach_workspace:
           at: /tmp
       - run:
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      - run:
           name: Set SSH Key Path
           command: echo 'export SSH_PRIVATE_KEY_PATH=~/.ssh/id_rsa' >> $BASH_ENV
       - run:
