@@ -49,13 +49,11 @@ jobs:
             terraform init
             terraform apply -auto-approve 
             # Terraformのアウトプットを取得
-            output_ec2_ip=$(terraform output -raw output_ec2_public_ip)
-            output_rds_endpoint=$(terraform output -raw rds_endpoint)
-            output_rds_pass=$(terraform output -raw rds_password)
-            # CircleCIの環境変数として設定
-            echo 'export TF_OUTPUT_EC2_IP=$output_ec2_ip' >> $BASH_ENV
-            echo 'export TF_OUTPUT_RDS_ENDPOINT=$output_rds_endpoint' >> $BASH_ENV
-            echo 'export TF_OUTPUT_RDS_PASS=$output_rds_pass' >> $BASH_ENV
+            echo $(terraform output -json) > /tmp/terraform-outputs.json
+      - store_artifacts:
+          path: /tmp/terraform-outputs.json
+          destination: terraform-outputs
+
 
   ansible-playbook:
     executor: ansible
@@ -128,6 +126,11 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
+      - run:
+          name: Fetch Terraform Outputs from Artifacts
+          command: |
+            curl -o terraform-outputs.json ${CIRCLE_BUILD_URL}/artifacts/0/home/circleci/project/terraform-outputs/terraform-outputs.json
+
       - run: 
           name: install the boto3
           command: sudo pip3 install boto3 

@@ -4,17 +4,21 @@
   gather_facts: true
   become: true
   tasks:
+    - name: Read Terraform Outputs
+      et_fact:
+        tf_outputs: "{{ lookup('file', 'terraform-outputs.json') | from_json }}"
+
     - name: Use Terraform output EC2 IP
       debug:
-        msg: "{{ lookup('env', 'TF_OUTPUT_EC2_IP') }}"
+        msg: "{{ tf_outputs.output_ec2_public_ip.value }}"
     
     - name: Use Terraform output RDS endpoint
       debug:
-        msg: "{{ lookup('env', 'TF_OUTPUT_RDS_ENDPOINT') }}"
+        msg: "{{ tf_outputs.rds_endpoint.value }}"
 
     - name: Use Terraform output RDS password
       debug:
-        msg: "{{ lookup('env', 'TF_OUTPUT_RDS_PASS') }}"
+        msg: "{{ tf_outputs.rds_password.value }}"
 
     - name: Debug PYTHONPATH
       debug:
