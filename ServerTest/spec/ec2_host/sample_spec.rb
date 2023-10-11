@@ -1,7 +1,9 @@
 require 'spec_helper'
 
 listen_port = 80
-
+host_name = ENV['TARGET_HOST']
+alb_endpoint = ENV['ALB_ENDPOINT']
+rds_endpoint = ENV['RDS_ENDPOINT']
 
 # パッケージのインストール確認
 %w{
@@ -71,18 +73,17 @@ describe port(listen_port) do
 end
 
 # 指定されたURLに対してHTTPリクエストを送信し、レスポンスのHTTPステータスコードが200（成功）であることを確認するテスト。レスポンスボディの内容は確認せず、HTTPコードを対象とする。
-describe command("curl http://13.231.108.50:#{listen_port}/ -o /dev/null -w '%{http_code}\n' -s") do
+describe command("curl http://#{host_name}:#{listen_port}/ -o /dev/null -w '%{http_code}\n' -s") do
   its(:stdout) { should match /^200$/ }
 end
 
-describe command("curl http://Lecture10-alb-1385515351.ap-northeast-1.elb.amazonaws.com/ -o /dev/null -w '%{http_code}\n' -s") do
+describe command("curl http://#{alb_endpoint}/ -o /dev/null -w '%{http_code}\n' -s") do
   its(:stdout) { should match /^200$/ }
 end
 
 # RDSのサーバー接続確認
 describe 'MySQL Command' do
-  host = 'lecture10-db.ckqxv4ruunm2.ap-northeast-1.rds.amazonaws.com'
-  command_string = "nc -zv #{host} 3306"
+  command_string = "nc -zv #{rds_endpoint} 3306"
 
   describe command(command_string) do
     its(:exit_status) { should eq 0 }
