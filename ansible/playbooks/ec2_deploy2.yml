@@ -9,9 +9,9 @@
     #   set_fact:
     #     tf_outputs: "{{ lookup('file', 'terraform-outputs.json') | from_json }}"
 
-    - name: Use Terraform output EC2 IP
+    - name: Debug TF_OUTPUT_EC2_IP
       debug:
-        var: "{{ lookup('env', 'TF_OUTPUT_EC2_IP') }}"
+        msg: "{{ lookup('env', 'TF_OUTPUT_EC2_IP') }}"
     
     # - name: Use Terraform output RDS endpoint
     #   debug:
