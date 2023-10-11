@@ -110,7 +110,6 @@ jobs:
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
-          inventory: <<parameters.inventory>>
           playbook: <<parameters.playbook>>
           private-key: <<parameters.private-key>>
 
@@ -163,7 +162,6 @@ jobs:
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
-          inventory: <<parameters.inventory>>
           playbook: <<parameters.playbook>>
           private-key: <<parameters.private-key>>
   cfn-lint:
@@ -224,14 +222,12 @@ workflows:
             - plan
       - ansible-playbook:
           version: "2.10.7"
-          inventory: ANSIBLE_PLAYBOOK_HOSTS
           playbook:  ./ansible/playbooks/ec2_deploy.yml
           private-key: AWS_PAIR_KEY
           requires:
             - apply
       - sample-app-deploy:
           version: "2.10.7"
-          inventory: ANSIBLE_PLAYBOOK_HOSTS
           playbook:  ./ansible/playbooks/ec2_deploy2.yml
           private-key: AWS_PAIR_KEY
           requires:
