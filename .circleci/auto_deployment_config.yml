@@ -92,12 +92,19 @@ jobs:
         default: NONEXISTENT_ANSIBLE_SSH_KEY
     steps:
       - checkout
+      - run:
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      - run:
+          name: Set environment variable from JSON
+          command: |
+            echo 'export TF_OUTPUT_EC2_IP=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
       - run:
           name: Add EC2 to known hosts
-          command: ssh-keyscan 18.177.168.5 >> ~/.ssh/known_hosts
+          command: ssh-keyscan ${TF_OUTPUT_EC2_IP} >> ~/.ssh/known_hosts
       - ansible/install:
           version: <<parameters.version>>
       - ansible/playbook:
