@@ -177,7 +177,7 @@ jobs:
   # server-test
   server_spec:
     docker:
-      - image: ruby:2.7
+      - image: circleci/ruby
     steps:
       - checkout
       - add_ssh_keys:
