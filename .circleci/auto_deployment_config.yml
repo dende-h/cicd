@@ -16,7 +16,10 @@ parameters:
     default: false
   run-raisetech-sample-config:
     type: boolean
-    default: false     
+    default: false  
+  run-circleci: 
+    type: boolean
+    default: false 
 
 executors:
   terraform:
@@ -52,7 +55,7 @@ jobs:
             mkdir -p /tmp/workspace
             echo $(terraform output -json) > /tmp/workspace/terraform-outputs.json
       - persist_to_workspace:
-          root: workspace
+          root: /tmp/workspace
           paths: 
             - terraform-outputs.json
 
@@ -175,7 +178,7 @@ workflows:
   # job is triggered.
   terraform-build-and-deploy:
     when: 
-      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>]
+      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>]
     jobs:
       - plan          
       - apply:
