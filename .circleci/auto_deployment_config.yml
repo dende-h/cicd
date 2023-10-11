@@ -124,6 +124,12 @@ jobs:
           name: install the boto3
           command: pip3 install boto3 botocore 
       - run:
+          name: Check Python and boto3
+          command: |
+            which python
+            python -V
+            python -m pip show boto3
+      - run:
           name: Add EC2 to known hosts
           command: ssh-keyscan 18.177.168.5 >> ~/.ssh/known_hosts
       - ansible/install:

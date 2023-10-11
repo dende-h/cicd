@@ -1,6 +1,6 @@
 [EC2server]
 18.177.168.5 ansible_ssh_user=ec2-user
 
-[all:vars]
+[EC2server:vars]
 ansible_python_interpreter=/usr/bin/python3
 
