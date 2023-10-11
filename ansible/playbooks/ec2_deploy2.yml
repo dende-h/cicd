@@ -1,6 +1,10 @@
 ---
 - name: Setup Rails app
   hosts: EC2server
+  vars:
+    ec2_ip: "{{ lookup('env', 'TF_OUTPUT_EC2_IP') }}"
+    rds_endpoint_with_port: "{{ lookup('env', 'TF_OUTPUT_RDS_ENDPOINT') }}"
+    rds_pasword: "{{ lookup('env', 'TF_OUTPUT_RDS_PASSWORD') }}"
   gather_facts: true
   become: true
   tasks:
@@ -26,35 +30,35 @@
     #     msg: "{{ lookup('env', 'PYTHONPATH') }}"
     #   delegate_to: localhost
 
-    - name: Ensure download directory exists
-      file:
-        path: /ansible/downloaded
-        state: directory
-      delegate_to: localhost
+    # - name: Ensure download directory exists
+    #   file:
+    #     path: /ansible/downloaded
+    #     state: directory
+    #   delegate_to: localhost
 
-    - name: Download tfstate from S3
-      vars:
-        ansible_python_interpreter: /usr/local/bin/python
-      aws_s3:
-        bucket: my-s3-bucket-terraform-state
-        object: development/terraform.tfstate
-        dest: /ansible/downloaded/terraform.tfstate
-        mode: get
-      delegate_to: localhost
+    # - name: Download tfstate from S3
+    #   vars:
+    #     ansible_python_interpreter: /usr/local/bin/python
+    #   aws_s3:
+    #     bucket: my-s3-bucket-terraform-state
+    #     object: development/terraform.tfstate
+    #     dest: /ansible/downloaded/terraform.tfstate
+    #     mode: get
+    #   delegate_to: localhost
 
     # - name: Get RDS Endpoint from Terraform output
     #   command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_endpoint"
     #   register: rds_endpoint_raw
     #   delegate_to: localhost
 
-    # - name: Extract just the RDS endpoint (without port)
-    #   set_fact:
-    #     rds_endpoint: "{{ rds_endpoint_raw.stdout.split(':')[0] }}"
+    - name: Extract just the RDS endpoint (without port)
+      set_fact:
+        rds_endpoint: "{{rds_endpoint_with_port.split(':')[0] }}"
 
-    - name: Get RDS Password from Terraform output
-      command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_password"
-      register: rds_password
-      delegate_to: localhost
+    # - name: Get RDS Password from Terraform output
+    #   command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_password"
+    #   register: rds_password
+    #   delegate_to: localhost
 
     # - name: Download tfstate from S3
     #   aws_s3:
@@ -80,7 +84,7 @@
         dest:  /var/www/raisetech-live8-sample-app/config/database.yml
       vars:
         db_host: "{{ rds_endpoint }}"
-        db_password: "{{ rds_password.stdout }}"
+        db_password: "{{ rds_password }}"
 
     - name: Generate storage.yml
       template:
