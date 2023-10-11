@@ -48,6 +48,14 @@ jobs:
             cd ./terraform/environments/development
             terraform init
             terraform apply -auto-approve 
+            # Terraformのアウトプットを取得
+            output_ec2_ip=$(terraform output -raw output_ec2_public_ip)
+            output_rds_endpoint=$(terraform output -raw rds_endpoint)
+            output_rds_pass=$(terraform output -raw rds_password)
+            # CircleCIの環境変数として設定
+            echo 'export TF_OUTPUT_EC2_IP=$output_ec2_ip' >> $BASH_ENV
+            echo 'export TF_OUTPUT_RDS_ENDPOINT=$output_rds_endpoint' >> $BASH_ENV
+            echo 'export TF_OUTPUT_RDS_PASS=$output_rds_pass' >> $BASH_ENV
 
   ansible-playbook:
     executor: ansible
