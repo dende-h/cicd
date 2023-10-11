@@ -42,14 +42,14 @@
         mode: get
       delegate_to: localhost
 
-    - name: Get RDS Endpoint from Terraform output
-      command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_endpoint"
-      register: rds_endpoint_raw
-      delegate_to: localhost
+    # - name: Get RDS Endpoint from Terraform output
+    #   command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_endpoint"
+    #   register: rds_endpoint_raw
+    #   delegate_to: localhost
 
-    - name: Extract just the RDS endpoint (without port)
-      set_fact:
-        rds_endpoint: "{{ rds_endpoint_raw.stdout.split(':')[0] }}"
+    # - name: Extract just the RDS endpoint (without port)
+    #   set_fact:
+    #     rds_endpoint: "{{ rds_endpoint_raw.stdout.split(':')[0] }}"
 
     - name: Get RDS Password from Terraform output
       command: "terraform output -state=/ansible/downloaded/terraform.tfstate rds_password"
