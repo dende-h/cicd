@@ -130,7 +130,7 @@ jobs:
           name: Fetch Terraform Outputs from Artifacts
           command: |
             curl -o terraform-outputs.json ${CIRCLE_BUILD_URL}/artifacts/0/home/circleci/project/terraform-outputs/terraform-outputs.json
-
+            which terraform-outputs.json
       - run: 
           name: install the boto3
           command: sudo pip3 install boto3 

@@ -4,9 +4,14 @@
   gather_facts: true
   become: true
   tasks:
-    - name: Read Terraform Outputs
-      set_fact:
-        tf_outputs: "{{ lookup('file', 'terraform-outputs.json') | from_json }}"
+    - name: Read terraform-outputs.json
+      include_vars:
+        file: ./terraform-outputs.json
+      when: "'./terraform-outputs.json' is exists"
+
+    # - name: Read Terraform Outputs
+    #   set_fact:
+    #     tf_outputs: "{{ lookup('file', 'terraform-outputs.json') | from_json }}"
 
     - name: Use Terraform output EC2 IP
       debug:
