@@ -140,8 +140,12 @@ jobs:
           name: Set environment variable from JSON
           command: |
             echo 'export TF_OUTPUT_EC2_IP=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export TF_OUTPUT_RDS_ENDPOINT=$(jq -r ".rds_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export TF_OUTPUT_RDS_PASSWORD=$(jq -r ".rds_password.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
             source $BASH_ENV
             echo $TF_OUTPUT_EC2_IP
+            echo $TF_OUTPUT_RDS_ENDPOINT
+            echo $TF_OUTPUT_RDS_PASSWORD
 
       - run: 
           name: install the boto3
