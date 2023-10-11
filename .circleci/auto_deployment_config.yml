@@ -49,6 +49,7 @@ jobs:
             terraform init
             terraform apply -auto-approve 
             # Terraformのアウトプットを取得
+            mkdir /tmp
             echo $(terraform output -json) > /tmp/terraform-outputs.json
       - persist_to_workspace:
           root: tmp
@@ -137,7 +138,7 @@ jobs:
           command: |
             export TF_OUTPUT_EC2_IP=$(jq -r '.output_ec2_public_ip' /tmp/terraform-outputs.json)
             echo 'export TF_OUTPUT_EC2_IP=$TF_OUTPUT_EC2_IP' >> $BASH_ENV
-            
+
       - run: 
           name: install the boto3
           command: sudo pip3 install boto3 

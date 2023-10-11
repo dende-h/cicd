@@ -4,10 +4,6 @@
   gather_facts: true
   become: true
   tasks:
-    - name: Read terraform-outputs.json
-      include_vars:
-        file: ./terraform-outputs.json
-      when: "'./terraform-outputs.json' is exists"
 
     # - name: Read Terraform Outputs
     #   set_fact:
