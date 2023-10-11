@@ -147,18 +147,18 @@ jobs:
             echo $TF_OUTPUT_RDS_ENDPOINT
             echo $TF_OUTPUT_RDS_PASSWORD
 
-      - run: 
-          name: install the boto3
-          command: sudo pip3 install boto3 
-      - run:
-          name: Set PYTHONPATH
-          command: echo 'export PYTHONPATH=$PYTHONPATH:/home/circleci/.local/lib/python3.10/site-packages' >> $BASH_ENV
-      - run:
-          name: Check Python and boto3
-          command: |
-            which python
-            python -V
-            python -m pip show boto3
+      # - run: 
+      #     name: install the boto3
+      #     command: sudo pip3 install boto3 
+      # - run:
+      #     name: Set PYTHONPATH
+      #     command: echo 'export PYTHONPATH=$PYTHONPATH:/home/circleci/.local/lib/python3.10/site-packages' >> $BASH_ENV
+      # - run:
+      #     name: Check Python and boto3
+      #     command: |
+      #       which python
+      #       python -V
+      #       python -m pip show boto3
       - run:
           name: Add EC2 to known hosts
           command: ssh-keyscan 18.177.168.5 >> ~/.ssh/known_hosts

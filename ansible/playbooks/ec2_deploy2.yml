@@ -80,7 +80,7 @@
 
     - name: Generate database.yml
       template:
-        src: ./ansible/templates/database.yml.j2
+        src: /home/circleci/project/ansible/templates/database.yml.j2
         dest:  /var/www/raisetech-live8-sample-app/config/database.yml
       vars:
         db_host: "{{ rds_endpoint }}"
@@ -88,17 +88,17 @@
 
     - name: Generate storage.yml
       template:
-        src: ./ansible/templates/storage.yml.j2
+        src: /home/circleci/project/ansible/templates/storage.yml.j2
         dest:  /var/www/raisetech-live8-sample-app/config/storage.yml
 
     - name: Generate application.yml
       template:
-        src: ./ansible/templates/application.yml.j2
+        src: /home/circleci/project/ansible/templates/application.yml.j2
         dest:  /var/www/raisetech-live8-sample-app/config/application.yml
 
     - name: Generate the systemd file
       template:
-        src: ./ansible/templates/systemd.yml.j2
+        src: /home/circleci/project/ansible/templates/systemd.yml.j2
         dest: /etc/systemd/system/unicorn.service
 
     - name: compile app
