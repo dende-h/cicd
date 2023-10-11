@@ -11,6 +11,8 @@
       delegate_to: localhost
 
     - name: Download tfstate from S3
+      vars:
+        ansible_python_interpreter: /usr/local/bin/python
       aws_s3:
         bucket: my-s3-bucket-terraform-state
         object: development/terraform.tfstate
