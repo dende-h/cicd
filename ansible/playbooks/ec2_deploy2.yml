@@ -4,6 +4,11 @@
   gather_facts: true
   become: true
   tasks:
+    - name: Debug PYTHONPATH
+      debug:
+      msg: "{{ lookup('env', 'PYTHONPATH') }}"
+      delegate_to: localhost
+      
     - name: Ensure download directory exists
       file:
         path: /ansible/downloaded
