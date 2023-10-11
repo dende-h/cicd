@@ -15,7 +15,7 @@
 
     - name: Use Terraform output EC2 IP
       debug:
-        msg: "{{ tf_outputs.output_ec2_public_ip.value }}"
+        msg: "{{ lookup('env', 'TF_OUTPUT_EC2_IP) }}"
     
     - name: Use Terraform output RDS endpoint
       debug:

@@ -50,9 +50,10 @@ jobs:
             terraform apply -auto-approve 
             # Terraformのアウトプットを取得
             echo $(terraform output -json) > /tmp/terraform-outputs.json
-      - store_artifacts:
-          path: /tmp/terraform-outputs.json
-          destination: terraform-outputs
+      - persist_to_workspace:
+          root: tmp
+          paths: 
+            - terraform-outputs.json
 
 
   ansible-playbook:
@@ -123,14 +124,20 @@ jobs:
         default: NONEXISTENT_ANSIBLE_SSH_KEY
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
       - run:
-          name: Fetch Terraform Outputs from Artifacts
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      - run:
+          name: Set environment variable from JSON
           command: |
-            curl -o terraform-outputs.json ${CIRCLE_BUILD_URL}/artifacts/0/home/circleci/project/terraform-outputs/terraform-outputs.json
-            which terraform-outputs.json
+            export TF_OUTPUT_EC2_IP=$(jq -r '.output_ec2_public_ip' /tmp/terraform-outputs.json)
+            echo 'export TF_OUTPUT_EC2_IP=$TF_OUTPUT_EC2_IP' >> $BASH_ENV
+            
       - run: 
           name: install the boto3
           command: sudo pip3 install boto3 
