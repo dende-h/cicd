@@ -4,7 +4,7 @@
   vars:
     ec2_ip: "{{ lookup('env', 'TF_OUTPUT_EC2_IP') }}"
     rds_endpoint_with_port: "{{ lookup('env', 'TF_OUTPUT_RDS_ENDPOINT') }}"
-    rds_pasword: "{{ lookup('env', 'TF_OUTPUT_RDS_PASSWORD') }}"
+    rds_password: "{{ lookup('env', 'TF_OUTPUT_RDS_PASSWORD') }}"
   gather_facts: true
   become: true
   tasks:
@@ -19,7 +19,7 @@
     
     - name: Use Terraform output RDS endpoint
       debug:
-        msg: "{{ lookup('env', 'TF_OUTPUT_RDS_ENDPOINT') }}"
+        msg: "{{rds_endpoint_with_port.split(':')[0] }}"
 
     - name: Use Terraform output RDS password
       debug:
