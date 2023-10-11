@@ -107,6 +107,10 @@ jobs:
       - run:
           name: Add EC2 to known hosts
           command: ssh-keyscan ${TF_OUTPUT_EC2_IP} >> ~/.ssh/known_hosts
+      - run:
+          name: Replace inventory template with actual values
+          command: |
+            sed -i "s/<TF_OUTPUT_EC2_IP>/${TF_OUTPUT_EC2_IP}/" ./ansible/inventories/development/hosts
       - ansible/install:
           version: <<parameters.version>>
       - run:
@@ -159,6 +163,10 @@ jobs:
       - run:
           name: Add EC2 to known hosts
           command: ssh-keyscan ${TF_OUTPUT_EC2_IP} >> ~/.ssh/known_hosts
+      - run:
+          name: Replace inventory template with actual values
+          command: |
+            sed -i "s/<TF_OUTPUT_EC2_IP>/${TF_OUTPUT_EC2_IP}/" ./ansible/inventories/development/hosts
       - ansible/install:
           version: <<parameters.version>>
       - run:
