@@ -7,7 +7,7 @@ resource "aws_security_group" "terraform_sec_gp_for_alb" {
     from_port   = var.alb_ingress_port
     to_port     = var.alb_ingress_port
     protocol    = "tcp"
-    cidr_blocks = var.my_ip
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
