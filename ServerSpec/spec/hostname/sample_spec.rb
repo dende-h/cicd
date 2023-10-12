@@ -22,7 +22,7 @@ describe command('mysql --version') do
 end
 
 # unicornの確認
-describe package('unicorn'), cwd: '/var/www/raisetech-live8-sample-app' do
+describe package('unicorn') do
   it { should be_installed.by('gem') }
 end
 
@@ -43,17 +43,17 @@ describe command('ps aux | grep "unicorn worker" | wc -l') do
 end
 
 # rubyのバージョン確認
-describe command('ruby -v'), cwd: '/var/www/raisetech-live8-sample-app' do
+describe command('/home/ec2-user/.rbenv/shims/ruby -v') do
   its(:stdout) { should match /ruby 3\.1\.2/ }
 end
 
 # bundlerのバージョン確認
-describe command('bundle -v'), cwd: '/var/www/raisetech-live8-sample-app' do
+describe command('bundle -v') do
   its(:stdout) { should match /Bundler version 2\.3\.14/ }
 end
 
 # Railsのバージョン確認
-describe command('rails -v'), cwd: '/var/www/raisetech-live8-sample-app' do
+describe command('rails -v') do
   its(:stdout) { should match /Rails 7\.0\.4/ } # ここに期待するバージョンを記述
 end
 

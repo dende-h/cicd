@@ -32,6 +32,9 @@ chocolateyを使用してインストール実施
 - terraformを動かすためterraformをインストールした環境をDockerで作成してコマンドを実行する
     - ```image: hashicorp/terraform:1.5.7```が使用可能
 - AWSのアクセスキーやシークレットキーは設定の環境変数に設定
+- sshkeyは設定に登録して発行されるフィンガープリントを使う
+- 環境を作成するのにOrbsを利用すると、簡略化して実行環境を作れる
+- 
 - terraformの変更とそれ以外の変更をした際でCircleCIの実行ワークフローを分岐するためにDynamicConfigを利用
     - [公式](https://circleci.com/docs/ja/using-dynamic-configuration/)
     - これにより無駄にterraformが実行されるのを回避でき、複数の環境を同じリポジトリで管理可能となる
