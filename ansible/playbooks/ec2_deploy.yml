@@ -59,6 +59,11 @@
       yum:
         name: mysql-community-devel
         state: present
+    
+    - name: Install mysql-community-server
+      yum:
+        name: mysql-community-server
+        state: present
     # rbenvを使ったRubyのセットアップ
     - name: Setup ruby using rbenv
       block:

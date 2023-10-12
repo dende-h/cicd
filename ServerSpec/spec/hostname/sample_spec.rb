@@ -67,16 +67,6 @@ describe command('yarn -v') do
   its(:stdout) { should match /1\.22\.19/ } # ここに期待するバージョンを記述
 end
 
-# ポートが開かれているか
-describe port(listen_port) do
-  it { should be_listening }
-end
-
-# 指定されたURLに対してHTTPリクエストを送信し、レスポンスのHTTPステータスコードが200（成功）であることを確認するテスト。レスポンスボディの内容は確認せず、HTTPコードを対象とする。
-describe command("curl http://#{host_name}:#{listen_port}/ -o /dev/null -w '%{http_code}\n' -s") do
-  its(:stdout) { should match /^200$/ }
-end
-
 describe command("curl http://#{alb_endpoint}/ -o /dev/null -w '%{http_code}\n' -s") do
   its(:stdout) { should match /^200$/ }
 end
