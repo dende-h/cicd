@@ -34,6 +34,7 @@
           - ImageMagick
           - ImageMagick-devel
           - epel-release
+          - nc
         state: present #削除する場合はabsent
 
       # デフォルトで入っているmariadbの削除
