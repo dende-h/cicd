@@ -215,7 +215,7 @@ jobs:
           name: Setup Serverspec
           command: |
             cd ./ServerSpec
-            gem install serverspec rake
+            gem install serverspec rake ed25519 bcrypt_pbkdf
       - run:
           name: Run Serverspec Tests
           command: |
