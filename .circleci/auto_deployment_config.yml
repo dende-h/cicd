@@ -211,7 +211,7 @@ jobs:
             echo 'export RDS_ENDPOINT=$(jq -r ".rds_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
       - run:
           name: Change ServerSpec host folder name
-          command: ./shell/change_folder_name.sh
+          command: bash ./shell/change_folder_name.sh
       - run:
           name: Setup Serverspec
           command: |
