@@ -188,17 +188,17 @@ jobs:
       - image: circleci/ruby
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "${KEY_FINGERPRINT}"
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "${KEY_FINGERPRINT}"
       - attach_workspace:
           at: /tmp
       - run:
           name: Install jq
           command: sudo apt-get update && sudo apt-get install -y jq
-      - run:
-          name: Set SSH Key Path
-          command: echo 'export SSH_PRIVATE_KEY_PATH=~/.ssh/id_rsa' >> $BASH_ENV
+      # - run:
+      #     name: Set SSH Key Path
+      #     command: echo 'export SSH_PRIVATE_KEY_PATH=~/.ssh/id_rsa' >> $BASH_ENV
       - run:
           name: Set environment variable from JSON
           command: |
@@ -208,12 +208,12 @@ jobs:
       - run:
           name: Setup Serverspec
           command: |
-            cd ./ServerTest
+            cd ./ServerSpec
             gem install serverspec rake
       - run:
           name: Run Serverspec Tests
           command: |
-            cd ./ServerTest
+            cd ./ServerSpec
             rake spec
 
 
