@@ -128,13 +128,11 @@ jobs:
           Ansible version
         type: string
         default: ''
-      inventory:
+      playbook-options:
         description: |
-          Ansible inventory file. The default value must be empty,
-          so do not store any value to this environment variable.
-          The data must be registered in base64 format
-        type: env_var_name
-        default: NONEXISTENT_ANSIBLE_INVENTORY
+          Ansible-playbook command options
+        type: string
+        default: ''
       playbook:
         description: |
           The path of Ansible playbook
@@ -231,26 +229,27 @@ workflows:
       or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>,<< pipeline.parameters.run-serverspec >>]
     jobs:
       - plan          
-      - apply:
-          requires:
-            - plan
-      - ansible-playbook:
-          version: "2.10.7"
-          playbook-options: '-i ./ansible/inventories/development/hosts'
-          playbook:  ./ansible/playbooks/ec2_deploy.yml
-          private-key: AWS_PAIR_KEY
-          requires:
-            - apply
-      - sample-app-deploy:
-          version: "2.10.7"
-          playbook-options: '-i ./ansible/inventories/development/hosts'
-          playbook:  ./ansible/playbooks/ec2_deploy2.yml
-          private-key: AWS_PAIR_KEY
-          requires:
-            - ansible-playbook
+      # - apply:
+      #     requires:
+      #       - plan
+      # - ansible-playbook:
+      #     version: "2.10.7"
+      #     playbook-options: '-i ./ansible/inventories/development/hosts'
+      #     playbook:  ./ansible/playbooks/ec2_deploy.yml
+      #     private-key: AWS_PAIR_KEY
+      #     requires:
+      #       - apply
+      # - sample-app-deploy:
+      #     version: "2.10.7"
+      #     playbook-options: '-i ./ansible/inventories/development/hosts'
+      #     playbook:  ./ansible/playbooks/ec2_deploy2.yml
+      #     private-key: AWS_PAIR_KEY
+      #     requires:
+      #       - ansible-playbook
       - server_spec:
           requires:
-            - sample-app-deploy
+              - plan
+            # - sample-app-deploy
 
   # when pipeline parameter, run-raisetech-sample-config is true, the
   # job is triggered.
