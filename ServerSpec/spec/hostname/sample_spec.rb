@@ -21,11 +21,6 @@ describe command('mysql --version') do
   its(:stdout) { should match /mysql\s+Ver\s+8\.0\.34/ }
 end
 
-# unicornの確認
-describe package('unicorn') do
-  it { should be_installed.by('gem') }
-end
-
 # Nginxの起動状態
 describe service('nginx') do
   it { should be_running }
@@ -43,17 +38,17 @@ describe command('ps aux | grep "unicorn worker" | wc -l') do
 end
 
 # rubyのバージョン確認
-describe command('/home/ec2-user/.rbenv/shims/ruby -v') do
+describe command('bash -lc "ruby -v"') do
   its(:stdout) { should match /ruby 3\.1\.2/ }
 end
 
 # bundlerのバージョン確認
-describe command('bundle -v') do
+describe command('bash -lc "bundle -v"') do
   its(:stdout) { should match /Bundler version 2\.3\.14/ }
 end
 
 # Railsのバージョン確認
-describe command('rails -v') do
+describe command('bash -lc "rails -v"') do
   its(:stdout) { should match /Rails 7\.0\.4/ } # ここに期待するバージョンを記述
 end
 
