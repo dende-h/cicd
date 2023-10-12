@@ -235,24 +235,23 @@ workflows:
       - apply:
           requires:
             - plan
-      # - ansible-playbook:
-      #     version: "2.10.7"
-      #     playbook-options: '-i ./ansible/inventories/development/hosts'
-      #     playbook:  ./ansible/playbooks/ec2_deploy.yml
-      #     private-key: AWS_PAIR_KEY
-      #     requires:
-      #       - apply
-      # - sample-app-deploy:
-      #     version: "2.10.7"
-      #     playbook-options: '-i ./ansible/inventories/development/hosts'
-      #     playbook:  ./ansible/playbooks/ec2_deploy2.yml
-      #     private-key: AWS_PAIR_KEY
-      #     requires:
-      #       - ansible-playbook
+      - ansible-playbook:
+          version: "2.10.7"
+          playbook-options: '-i ./ansible/inventories/development/hosts'
+          playbook:  ./ansible/playbooks/ec2_deploy.yml
+          private-key: AWS_PAIR_KEY
+          requires:
+            - apply
+      - sample-app-deploy:
+          version: "2.10.7"
+          playbook-options: '-i ./ansible/inventories/development/hosts'
+          playbook:  ./ansible/playbooks/ec2_deploy2.yml
+          private-key: AWS_PAIR_KEY
+          requires:
+            - ansible-playbook
       - server_spec:
           requires:
-              - apply
-            # - sample-app-deploy
+            - sample-app-deploy
 
   # when pipeline parameter, run-raisetech-sample-config is true, the
   # job is triggered.
