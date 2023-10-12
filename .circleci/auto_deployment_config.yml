@@ -206,7 +206,7 @@ jobs:
       - run:
           name: Set environment variable from JSON
           command: |
-            echo 'export TARGET_HOST=$(jq -r ".output_alb_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export TARGET_HOST=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
             echo 'export ALB_ENDPOINT=$(jq -r ".output_alb_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
             echo 'export RDS_ENDPOINT=$(jq -r ".rds_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
       - run:
