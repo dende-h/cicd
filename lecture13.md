@@ -13,21 +13,21 @@
 ### 構成図
 ![diagram](/AWS-configuration-diagram/AWS課題構成図lecture13.drawio.png)
 ### terraformで環境構築を自動化
-[terraform/environments/development](https://github.com/dende-h/aws-ruby/tree/lecture13/terraform/environments/development)
+[terraform/environments/development](https://github.com/dende-h/aws-ruby/tree/lecture13/terraform/environments/development)  
 [terraform/modules](https://github.com/dende-h/aws-ruby/tree/lecture13/terraform/modules)
 
 ### Ansibleでプロビジョニング
-[ansible/inventories/development/hosts](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/inventories/development/hosts)
-[ansible/playbooks/ec2_deploy.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy.yml)
-[ansible/playbooks/ec2_deploy2.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy2.yml)
+[ansible/inventories/development/hosts](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/inventories/development/hosts)  
+[ansible/playbooks/ec2_deploy.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy.yml)  
+[ansible/playbooks/ec2_deploy2.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy2.yml)  
 [ansible/templates](https://github.com/dende-h/aws-ruby/tree/lecture13/ansible/templates)
 
 ### Server specでインフラテスト
-[ServerSpec/spec/hostname/sample_spec.rb](https://github.com/dende-h/aws-ruby/blob/lecture13/ServerSpec/spec/hostname/sample_spec.rb)
+[ServerSpec/spec/hostname/sample_spec.rb](https://github.com/dende-h/aws-ruby/blob/lecture13/ServerSpec/spec/hostname/sample_spec.rb)  
 [ServerSpec/spec/spec_helper.rb](https://github.com/dende-h/aws-ruby/blob/lecture13/ServerSpec/spec/spec_helper.rb)
 
 ### CircleCIで自動化
-[config.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/.circleci/config.yml)
+[config.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/.circleci/config.yml)  
 [auto_deployment_config.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/.circleci/auto_deployment_config.yml)
 
 ### CircleCI実行結果
