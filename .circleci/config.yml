@@ -19,7 +19,7 @@ workflows:
           # line:
           # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
           mapping: |
-            SeverSpec/.* run-serverspec true
+            ServerSpec/.* run-serverspec true
             .circleci/.* run-circleci true
             ansible/.* run-ansible true
             terraform/environments/development/.* run-development-terraform-build true
