@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-listen_port = 80
 host_name = ENV['TARGET_HOST']
 alb_endpoint = ENV['ALB_ENDPOINT']
 rds_endpoint = ENV['RDS_ENDPOINT'].split(':')[0]

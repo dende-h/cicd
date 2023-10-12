@@ -94,7 +94,7 @@
 前提：サンプルアプリケーションを使っているのであくまでインフラ環境に関しての考察とする  
 
 **構築環境構成図**
-![構成図](./AWS-configuration-diagram/AWS構成図.drawio.png)
+![構成図](/AWS-configuration-diagram/AWS構成図.drawio.png)
 
 **構築の際セキュリティに考慮しているポイント**  
 - ELBへのAccessは自分のPCのIPアドレスからのみ許可している

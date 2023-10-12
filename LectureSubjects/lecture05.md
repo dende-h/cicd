@@ -6,77 +6,77 @@
 
 **EC2でPumaを立ち上げる**
 
-![puma](./images/lecture05/teratarm-booting-puma2023-08-29.png)
+![puma](/images/lecture05/teratarm-booting-puma2023-08-29.png)
 
 **EC2のパブリックIPアドレスを確認**
 
-![EC2IP](./images/lecture05/ec2-ip2023-08-29.png)
+![EC2IP](/images/lecture05/ec2-ip2023-08-29.png)
 
 **<EC2のパブリックIP>：3000でアプリの動作を確認**
 
-![port](./images/lecture05/ec2port3000-2023-08-29.png)
+![port](/images/lecture05/ec2port3000-2023-08-29.png)
 
 ###　NginxとUnicornにわけて動作させる
 
 **Nginxの動作確認**
 
-![Nginx](./images/lecture05/nginx2023-09-02.png)
+![Nginx](/images/lecture05/nginx2023-09-02.png)
 
 **NginxとUnicornの動作確認**
 
-![Nginx](./images/lecture05/nginxserver2023-09-06.png)
-![Unicorn](./images/lecture05/unicornserver2023-09-06.png)
+![Nginx](/images/lecture05/nginxserver2023-09-06.png)
+![Unicorn](/images/lecture05/unicornserver2023-09-06.png)
 
 **サンプルアプリの動作確認**
 
-![ec2-app](./images/lecture05/unicorn-nginx-ec2-app2023-09-06.png)
+![ec2-app](/images/lecture05/unicorn-nginx-ec2-app2023-09-06.png)
 
 **Unicornをとめた場合の画面表示**
 
-![UnicornStop](./images/lecture05/unicorn-stop2023-09-06.png)
+![UnicornStop](/images/lecture05/unicorn-stop2023-09-06.png)
 
 **Nginxをとめた場合の画面表示**
 
-![NginxStop](./images/lecture05/nginx-stop2023-09-06.png)
+![NginxStop](/images/lecture05/nginx-stop2023-09-06.png)
 
 ### ロードバランサーを追加する
 
 **ロードバランサーを作成**
 
-![elb](./images/lecture05/elb2023-09-07.png)
+![elb](/images/lecture05/elb2023-09-07.png)
 
 **ターゲットグループ**
 
-![target](./images/lecture05/target-gp2023-09-07.png)
+![target](/images/lecture05/target-gp2023-09-07.png)
 
 **EC2とELBのセキュリティグループの設定**
 
-![ec2-sec](./images/lecture05/ec2-sec-after-add-elb2023-09-07.png)
-![elb-sec](./images/lecture05/elb-sec2023-09-07.png)
+![ec2-sec](/images/lecture05/ec2-sec-after-add-elb2023-09-07.png)
+![elb-sec](/images/lecture05/elb-sec2023-09-07.png)
 
 **ELBのDNSでアプリへアクセス**
 
-![elb-app](./images/lecture05/elb-app2023-09-08.png)
+![elb-app](/images/lecture05/elb-app2023-09-08.png)
 
 ### S3の導入
 
 **S3の作成**
 
-![s3](./images/lecture05/s3buket2023-09-08.png)
+![s3](/images/lecture05/s3buket2023-09-08.png)
 
 **VPCエンドポイント(Gateway)の作成**
 
-![endpoint](./images/lecture05/S3endpoint2023-09-08.png)
-![map](./images/lecture05/vpcmap2023-09-08.png)
+![endpoint](/images/lecture05/S3endpoint2023-09-08.png)
+![map](/images/lecture05/vpcmap2023-09-08.png)
 
 **サンプルアプリへのアップロード確認**
 
-![image-up](./images/lecture05/image-upload2023-09-08.png)
-![aws-cli](./images/lecture05/aws-cli2023-09-08.png)
+![image-up](/images/lecture05/image-upload2023-09-08.png)
+![aws-cli](/images/lecture05/aws-cli2023-09-08.png)
 
 ### 構成図の作成
 
-![aws-dia](./AWS-configuration-diagram/AWS構成図.drawio.png)
+![aws-dia](/AWS-configuration-diagram/AWS構成図.drawio.png)
 
 ## 課題を進めるうえで注意したところと苦労したところ
 **注意した点**

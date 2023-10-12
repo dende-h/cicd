@@ -1,14 +1,65 @@
 ## AWSコース第13回課題「CircleCIにAnsilbleやServerSpecの処理を追加」
 
-### terraformで環境構築
+### この課題について
+今回課題を進めるにあたって、下記2点チャレンジをした。
+- 課題10の構成をterraformで構築する
+- host名などを動的に取得して、構築ゼロの状態からアプリケーションをデプロイしてテストまでを自動化
+  
+実際に取り組んで感じたのは、アプリケーションのデプロイまでを含めてしまうと動的に取得して設定を変更しなければいけない箇所が出てくるため複雑になりやすい。
+プロジェクトにもよるが、アプリのデプロイに関しては、アプリのテスト→デプロイの自動化の仕組みを構築する方がいいのかなと思った。
+ただ今回の取り組みを通して、環境変数やshell周りについて考えることが多かったのは良い経験となった。
+全課題を通して、曖昧な理解のまま進んできたものもあるので、見返しながら記事にまとめるなどして理解を深めたい。
+
+### 構成図
+![diagram](/AWS-configuration-diagram/AWS課題構成図lecture13.drawio.png)
+### terraformで環境構築を自動化
+[terraform/environments/development](https://github.com/dende-h/aws-ruby/tree/lecture13/terraform/environments/development)
+[terraform/modules](https://github.com/dende-h/aws-ruby/tree/lecture13/terraform/modules)
+
+### Ansibleでプロビジョニング
+[ansible/inventories/development/hosts](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/inventories/development/hosts)
+[ansible/playbooks/ec2_deploy.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy.yml)
+[ansible/playbooks/ec2_deploy2.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy2.yml)
+[ansible/templates](https://github.com/dende-h/aws-ruby/tree/lecture13/ansible/templates)
+
+### Server specでインフラテスト
+[ServerSpec/spec/hostname/sample_spec.rb](https://github.com/dende-h/aws-ruby/blob/lecture13/ServerSpec/spec/hostname/sample_spec.rb)
+[ServerSpec/spec/spec_helper.rb](https://github.com/dende-h/aws-ruby/blob/lecture13/ServerSpec/spec/spec_helper.rb)
+
+### CircleCIで自動化
+[config.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/.circleci/config.yml)
+[auto_deployment_config.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/.circleci/auto_deployment_config.yml)
+
+### CircleCI実行結果
+**plan job(terraform)**  
+![plan](/images/lecture13/success-plan.png)
+**apply job(terraform)**  
+![apply](/images/lecture13/success-apply.png)
+**ansible-playbook job(Ansible)**  
+![playbook](/images/lecture13/success-playbook.png)
+**課題とは別に個人的興味チャレンジとしてsample-app-deploy jobを作成(Ansible)**  
+![deploy](/images/lecture13/success-deploy.png)
+**server_spec job(ServerSpec)**  
+![servertest](/images/lecture13/success-serverspec.png)
+**workflow全体**  
+![workfolw](/images/lecture13/success-circleci.png)
+
+### terraform destroyで一度全て破棄後再度ワークフローを回してみる
+**ワークフロー成功後ALBのエンドポイントへアクセスしてみる**  
+![app](/images/lecture13/application.png)
+  
+**アプリケーションの正常動作を確認**
+
+## その他メモ
+### terraformの使い方
 **terraformのインストール**
 chocolateyを使用してインストール実施
-![choco](./images/lecture13/install_terraform2023-10-02.png)
-![terraform-i](./images/lecture13/install-terraform2023-10-02.png)
-![tflint-i](./images/lecture13/install_tflint2023-10-02.png)
-![install-v](./images/lecture13/install-v2023-10-02.png)
+![choco](/images/lecture13/install_terraform2023-10-02.png)
+![terraform-i](/images/lecture13/install-terraform2023-10-02.png)
+![tflint-i](/images/lecture13/install_tflint2023-10-02.png)
+![install-v](/images/lecture13/install-v2023-10-02.png)
 **terraform拡張機能インストール**
-![plugin](./images/lecture13/vscode-plugin2023-10-02.png)
+![plugin](/images/lecture13/vscode-plugin2023-10-02.png)
 
 **terraformメモ**
 - 環境ごとに構築する場合
@@ -28,13 +79,14 @@ chocolateyを使用してインストール実施
     - ローカルでapplyした場合とCircleCIでapplyした場合で差異がないように整合性を保てる
 - アウトバウンドルールを明記しないとアウトバウンドルールが全拒否になる
 
+### CircleCIでJobを実行する
 **CircleCIメモ**
 - terraformを動かすためterraformをインストールした環境をDockerで作成してコマンドを実行する
     - ```image: hashicorp/terraform:1.5.7```が使用可能
 - AWSのアクセスキーやシークレットキーは設定の環境変数に設定
 - sshkeyは設定に登録して発行されるフィンガープリントを使う
 - 環境を作成するのにOrbsを利用すると、簡略化して実行環境を作れる
-- 
+- ジョブ間で変数を共有したい場合はworkspaceやArtifactsに保存して受け渡しできる
 - terraformの変更とそれ以外の変更をした際でCircleCIの実行ワークフローを分岐するためにDynamicConfigを利用
     - [公式](https://circleci.com/docs/ja/using-dynamic-configuration/)
     - これにより無駄にterraformが実行されるのを回避でき、複数の環境を同じリポジトリで管理可能となる
@@ -150,8 +202,7 @@ chocolateyを使用してインストール実施
             jobs:
             - cfn-lint
         ```    
-
-### コンテナによるAnsilble実行環境の構築
+### コンテナによるAnsilble実行環境の構築（ローカルでAnsibleを試す）
 **Docker for windowsを使用する**
 - Docker for windowsのインストール～AnsibleでHelloworldを表示する
     ```
@@ -241,14 +292,16 @@ chocolateyを使用してインストール実施
         ```
         ![nginx-install](./images/lecture13/Nginx-install2023-10-05.png)
 
-Dockerにした変更メモ
-docker cp C:/Users/<user-name>/.aws <dockerID>:/root/
-bash-5.2# curl -O https://releases.hashicorp.com/terraform/1.1.0/terraform_1.1.0_linux_amd64.zip
-bash-5.2# yum install unzip -y
-bash-5.2# unzip terraform_1.1.0_linux_amd64.zip
-bash-5.2# mv terraform /usr/local/bin/
-bash-5.2# terraform version
-Terraform v1.1.0
-bash-5.2# pip3 install boto3 botocore
+- Docker内でterraform利用する際のインストール
+    ```
+    docker cp C:/Users/<user-name>/.aws <dockerID>:/root/
+    bash-5.2# curl -O https://releases.hashicorp.com/terraform/1.1.0/terraform_1.1.0_linux_amd64.zip
+    bash-5.2# yum install unzip -y
+    bash-5.2# unzip terraform_1.1.0_linux_amd64.zip
+    bash-5.2# mv terraform /usr/local/bin/
+    bash-5.2# terraform version
+    Terraform v1.1.0
 
-
+    #  terraformのoutputをダウンロードした際に必要だったライブラリ
+    bash-5.2# pip3 install boto3 botocore
+    ```

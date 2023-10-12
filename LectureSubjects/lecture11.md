@@ -99,9 +99,9 @@ end
 
 ```
 **test結果**
-![test1](./images/lecture11/test-result2023-09-30.png)
-![test2](./images/lecture11/test-result2-2023-09-30.png)
-![test3](./images/lecture11/test-result3-2023-09-30.png)
+![test1](/images/lecture11/test-result2023-09-30.png)
+![test2](/images/lecture11/test-result2-2023-09-30.png)
+![test3](/images/lecture11/test-result3-2023-09-30.png)
 
 ### 苦労した点
 unicornの起動や停止をunicorn.rakeファイルでtask定義していたが、Severspecをアプリケーションルートで設定したためRakefileとの競合や、Rails環境でServerspecが動作しない
