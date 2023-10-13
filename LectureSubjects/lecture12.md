@@ -10,13 +10,13 @@
 
 ### 動作確認
 **configファイルにわざと不正な半角スペースを入れた場合**
-![failed](./images/lecture12/failed-validate2023-10-02.png)
+![failed](/images/lecture12/failed-validate2023-10-02.png)
   
   
 **configファイルを修正後**
-![valid](./images/lecture12/valid2023-10-02.png)
+![valid](/images/lecture12/valid2023-10-02.png)
   
   
 
 **GitHubに変更をプッシュCircleCI**
-![circleci](./images/lecture12/circleci-pipelines2023-10-02.png)
+![circleci](/images/lecture12/circleci-pipelines2023-10-02.png)

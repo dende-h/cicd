@@ -1,18 +1,37 @@
 version: 2.1
+
+# this allows you to use CircleCI's dynamic configuration feature
+setup: true
+
+# the path-filtering orb is required to continue a pipeline based on
+# the path of an updated fileset
 orbs:
-  python: circleci/python@2.0.3
-jobs:
-  cfn-lint:
-    executor: python/default
-    steps:
-      - checkout
-      - run: pip install cfn-lint
-      - run:
-          name: run cfn-lint
-          command: |
-            cfn-lint -i W3002 -t cloudformation/*.yml
+  path-filtering: circleci/path-filtering@1.0.0
 
 workflows:
-  raisetech:
+  # the always-run workflow is always triggered, regardless of the pipeline parameters.
+  always-run:
     jobs:
-      - cfn-lint
+      # the path-filtering/filter job determines which pipeline
+      - path-filtering/filter:
+          name: check-updated-files
+          # 3-column, whitespace-delimited mapping. One mapping per
+          # line:
+          # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
+          mapping: |
+            ServerSpec/.* run-serverspec true
+            .circleci/.* run-circleci true
+            ansible/.* run-ansible true
+            terraform/environments/development/.* run-development-terraform-build true
+            terraform/modules/.* run-modules-terraform-build true
+            ^((?!terraform/).)*$ run-raisetech-sample-config true
+          base-revision: lecture13
+          # this is the path of the configuration we should trigger once
+          # path filtering and pipeline parameter value updates are
+          # complete. In this case, we are using the parent dynamic
+          # configuration itself.
+          config-path: .circleci/auto_deployment_config.yml
+
+      
+
+

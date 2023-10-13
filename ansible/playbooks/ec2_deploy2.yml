@@ -1,0 +1,75 @@
+---
+- name: Setup Rails app
+  hosts: EC2server
+  vars:
+    ec2_ip: "{{ lookup('env', 'TF_OUTPUT_EC2_IP') }}"
+    rds_endpoint_with_port: "{{ lookup('env', 'TF_OUTPUT_RDS_ENDPOINT') }}"
+    rds_password: "{{ lookup('env', 'TF_OUTPUT_RDS_PASSWORD') }}"
+  gather_facts: true
+  become: true
+  tasks:
+
+    - name: Extract just the RDS endpoint (without port)
+      set_fact:
+        rds_endpoint: "{{rds_endpoint_with_port.split(':')[0] }}"
+
+    - name: Generate database.yml
+      template:
+        src: /home/circleci/project/ansible/templates/database.yml.j2
+        dest:  /var/www/raisetech-live8-sample-app/config/database.yml
+      vars:
+        db_host: "{{ rds_endpoint }}"
+        db_password: "{{ rds_password }}"
+
+    - name: Generate storage.yml
+      template:
+        src: /home/circleci/project/ansible/templates/storage.yml.j2
+        dest:  /var/www/raisetech-live8-sample-app/config/storage.yml
+
+    - name: Generate application.yml
+      template:
+        src: /home/circleci/project/ansible/templates/application.yml.j2
+        dest:  /var/www/raisetech-live8-sample-app/config/application.yml
+
+    - name: Generate the systemd file
+      template:
+        src: /home/circleci/project/ansible/templates/systemd.yml.j2
+        dest: /etc/systemd/system/unicorn.service
+
+    - name: compile app
+      block:
+
+      - name: Bundle install
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app && bundle install"
+      
+      - name: Generate secret key
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  bundle exec rails secret RAILS_ENV=production"
+        register: secret_env
+
+      - name: Replace secret key in application.yml
+        lineinfile: #特定の行をファイルに追加または置換する
+          path: /var/www/raisetech-live8-sample-app/config/application.yml #記述先を指定
+          regexp: <will-be-replaced-key>
+          line: "SECRET_KEY_BASE: {{ secret_env.stdout }}" # with_itemsに定義した内容が入る
+
+      - name: Rails app setup
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app && RAILS_ENV=production bin/setup "
+
+      - name: Clear Rails cache
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  RAILS_ENV=production rake tmp:cache:clear"
+
+      - name: Precompile assets
+        shell: bash -lc "cd /var/www/raisetech-live8-sample-app &&  RAILS_ENV=production rake assets:precompile"
+      become: false
+    # nginxの起動
+    - name: Start nginx service
+      service:
+        name: nginx
+        state: started
+    # Unicornの起動
+    - name: Ensure unicorn is started
+      service:
+        name: unicorn
+        state: started
+        enabled: yes
+

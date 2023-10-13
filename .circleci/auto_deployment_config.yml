@@ -1,0 +1,262 @@
+version: 2.1           
+
+orbs:
+  python: circleci/python@2.0.3
+  ansible: orbss/ansible-playbook@0.0.5
+
+parameters:
+  run-development-terraform-build:
+    type: boolean
+    default: false
+  run-modules-terraform-build:
+    type: boolean
+    default: false
+  run-ansible:
+    type: boolean
+    default: false
+  run-raisetech-sample-config:
+    type: boolean
+    default: false  
+  run-circleci: 
+    type: boolean
+    default: false 
+  run-serverspec:
+    type: boolean
+    default: false 
+
+executors:
+  terraform:
+    docker:
+      - image: hashicorp/terraform:1.5.7
+  ansible:
+    docker:
+      - image: circleci/python
+
+jobs:
+# infrastructure as code
+  plan:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: Terraform Plan
+          command: |
+            cd ./terraform/environments/development
+            terraform init
+            terraform plan 
+
+  apply:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: Terraform Apply
+          command: |
+            cd ./terraform/environments/development
+            terraform init
+            terraform apply -auto-approve 
+            # Terraformのアウトプットを取得
+            mkdir -p /tmp/workspace
+            echo $(terraform output -json) > /tmp/workspace/terraform-outputs.json
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths: 
+            - terraform-outputs.json
+
+  # setup-ec2
+  ansible-playbook:
+    executor: ansible
+    parameters:
+      version:
+        description: |
+          Ansible version
+        type: string
+        default: ''
+      playbook-options:
+        description: |
+          Ansible-playbook command options
+        type: string
+        default: ''
+      playbook:
+        description: |
+          The path of Ansible playbook
+        type: string
+      private-key:
+        description: |
+          SSH private key file. The default value must be empty,
+          so do not store any value to this environment variable.
+          The data must be registered in base64 format
+        type: env_var_name
+        default: NONEXISTENT_ANSIBLE_SSH_KEY
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      - run:
+          name: Set environment variable from JSON
+          command: |
+            echo 'export TF_OUTPUT_EC2_IP=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+      - add_ssh_keys:
+          fingerprints:
+            - "${KEY_FINGERPRINT}"
+      - run:
+          name: Add EC2 to known hosts
+          command: ssh-keyscan ${TF_OUTPUT_EC2_IP} >> ~/.ssh/known_hosts
+      - run:
+          name: Replace inventory template with actual values
+          command: |
+            sed -i "s/<TF_OUTPUT_EC2_IP>/${TF_OUTPUT_EC2_IP}/" ./ansible/inventories/development/hosts
+      - ansible/install:
+          version: <<parameters.version>>
+      - ansible/playbook:
+          playbook-options: <<parameters.playbook-options>>
+          playbook: <<parameters.playbook>>
+          private-key: <<parameters.private-key>>          
+      # - run:
+      #     name: Run Ansible Playbook
+      #     command: ansible-playbook -i ./ansible/inventories/development/hosts ./ansible/playbooks/ec2_deploy.yml
+
+  # app-deploy
+  sample-app-deploy:
+    executor: ansible
+    parameters:
+      version:
+        description: |
+          Ansible version
+        type: string
+        default: ''
+      playbook-options:
+        description: |
+          Ansible-playbook command options
+        type: string
+        default: ''
+      playbook:
+        description: |
+          The path of Ansible playbook
+        type: string
+      private-key:
+        description: |
+          SSH private key file. The default value must be empty,
+          so do not store any value to this environment variable.
+          The data must be registered in base64 format
+        type: env_var_name
+        default: NONEXISTENT_ANSIBLE_SSH_KEY
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp
+      - add_ssh_keys:
+          fingerprints:
+            - "${KEY_FINGERPRINT}"
+      - run:
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      - run:
+          name: Set environment variable from JSON
+          command: |
+            echo 'export TF_OUTPUT_EC2_IP=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export TF_OUTPUT_RDS_ENDPOINT=$(jq -r ".rds_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export TF_OUTPUT_RDS_PASSWORD=$(jq -r ".rds_password.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+      - run:
+          name: Add EC2 to known hosts
+          command: ssh-keyscan ${TF_OUTPUT_EC2_IP} >> ~/.ssh/known_hosts
+      - run:
+          name: Replace inventory template with actual values
+          command: |
+            sed -i "s/<TF_OUTPUT_EC2_IP>/${TF_OUTPUT_EC2_IP}/" ./ansible/inventories/development/hosts
+      - ansible/install:
+          version: <<parameters.version>>
+      - ansible/playbook:
+          playbook-options: <<parameters.playbook-options>>
+          playbook: <<parameters.playbook>>
+          private-key: <<parameters.private-key>>
+      # - run:
+      #     name: Run Ansible Playbook
+      #     command: ansible-playbook -i ./ansible/inventories/development/hosts ./ansible/playbooks/ec2_deploy2.yml
+  cfn-lint:
+    executor: python/default
+    steps:
+      - checkout
+      - run: pip install cfn-lint
+      - run:
+          name: run cfn-lint
+          command: |
+            cfn-lint -i W3002 -t cloudformation/*.yml
+
+  # server-test
+  server_spec:
+    docker:
+      - image: circleci/ruby
+    steps:
+      - checkout
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "${KEY_FINGERPRINT}"
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      # - run:
+      #     name: Set SSH Key Path
+      #     command: echo 'export SSH_PRIVATE_KEY_PATH=~/.ssh/id_rsa' >> $BASH_ENV
+      - run:
+          name: Set environment variable from JSON
+          command: |
+            echo 'export TARGET_HOST=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export ALB_ENDPOINT=$(jq -r ".output_alb_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export RDS_ENDPOINT=$(jq -r ".rds_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+      - run:
+          name: Change ServerSpec host folder name
+          command: bash ./shell/change_folder_name.sh
+      - run:
+          name: Setup Serverspec
+          command: |
+            cd ./ServerSpec
+            gem install serverspec rake ed25519 bcrypt_pbkdf
+      - run:
+          name: Run Serverspec Tests
+          command: |
+            cd ./ServerSpec
+            rake spec
+
+
+workflows:
+  # when pipeline parameter, run-development-terraform-build is true, the
+  # job is triggered.
+  terraform-build-and-deploy:
+    when: 
+      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>,<< pipeline.parameters.run-serverspec >>]
+    jobs:
+      - plan          
+      - apply:
+          requires:
+            - plan
+      - ansible-playbook:
+          version: "2.10.7"
+          playbook-options: '-i ./ansible/inventories/development/hosts'
+          playbook:  ./ansible/playbooks/ec2_deploy.yml
+          private-key: AWS_PAIR_KEY
+          requires:
+            - apply
+      - sample-app-deploy:
+          version: "2.10.7"
+          playbook-options: '-i ./ansible/inventories/development/hosts'
+          playbook:  ./ansible/playbooks/ec2_deploy2.yml
+          private-key: AWS_PAIR_KEY
+          requires:
+            - ansible-playbook
+      - server_spec:
+          requires:
+            - sample-app-deploy
+
+  # when pipeline parameter, run-raisetech-sample-config is true, the
+  # job is triggered.
+  sample-jobs:
+    when: << pipeline.parameters.run-raisetech-sample-config >>
+    jobs:
+      - cfn-lint
+

@@ -1,0 +1,25 @@
+[Unit]
+Description=The unicorn process
+
+
+[Service]
+User=ec2-user
+WorkingDirectory=/var/www/raisetech-live8-sample-app
+SyslogIdentifier=unicorn
+Type=simple
+Restart=on-failure
+PIDFile=/var/www/raisetech-live8-sample-app/tmp/unicorn.pid
+Environment=RAILS_ENV=production
+Environment=UNICORN_CONF=/var/www/raisetech-live8-sample-app/config/unicorn.rb
+Environment=BUNDLE_GEMFILE=/var/www/raisetech-live8-sample-app/Gemfile
+
+
+ExecStart=/bin/bash -l -c 'bin/rails unicorn:start'
+ExecStop=/usr/bin/kill -QUIT $MAINPID
+# The unicorn process is gracefully restarted with `kill -USR2 <PID>` along with the setting
+# in the before_fork hook in config/unicorn.rb.
+# ref: https://tachesimazzoca.github.io/wiki/rails3/unicorn.html
+ExecReload=/usr/bin/kill -USR2 $MAINPID
+
+[Install]
+WantedBy=multi-user.target

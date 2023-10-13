@@ -34,11 +34,11 @@ Webサーバーから要求を受けてプログラムを実行したり、必�
 今回コマンド```rails s```でBooting Pumaと起動したのがAPサーバー。
 この状態でサーバーにアクセスすると下記のようにアプリの動作が確認できる。
 
-![App](./images/lecture03/app-screen2023-08-21.png)
+![App](/images/lecture03/app-screen2023-08-21.png)
 
 サーバーを終了して再度同じようにアクセスをしてもアプリは動作しない。
 
-![Opps](./images/lecture03/opps-screen2023-08-21.png)
+![Opps](/images/lecture03/opps-screen2023-08-21.png)
 
 クライアントからのリクエストが静的コンテンツのみの場合は、APサーバーとWebサーバー間の通信は行わず、Webサーバーのみで処理をする。
 
@@ -53,7 +53,7 @@ DBサーバーはDBMS(データベースマネジメントシステム)を介し
 そしてサーバ上のリレーショナルデータベースを操作するのがSQLという言語。
 APサーバーからSQLでDBサーバー内のデータベースを操作することができる。
 
-![sql](./images/lecture03/sql-screen2023-08-21.png)
+![sql](/images/lecture03/sql-screen2023-08-21.png)
 
 今回の課題ではMySQLサーバーのVersion 8.0.34を使用した。
 ちなみにGemfileに記載しているgem mysql2はDBサーバーのことではなく、RailsがDBサーバーに接続するためのクライアントライブラリ。
@@ -65,7 +65,7 @@ APサーバーからSQLでDBサーバー内のデータベースを操作する�
 Railsの開発ではGemというライブラリを使ってアプリを作成していくのが一般的。
 そのgemの依存関係の管理を楽にしてくれるツールがBundler。Bundlerもgemの一つ。
 
-![gem](./images/lecture03/gem2023-08-21.png) 
+![gem](/images/lecture03/gem2023-08-21.png) 
 
 上図で挙げたgemはほんの一部であり、これらを一つ一つ管理するのは大変。
 BundlerはBundle installでGemfileに記載された内容に基づいて、一括でgemのインストールをしてくれる。

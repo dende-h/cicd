@@ -1,0 +1,195 @@
+---
+- name: Setup EC2 instance
+  hosts: EC2server
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Enable EPEL via amazon-linux-extras
+      command: amazon-linux-extras install epel -y
+      args:
+        creates: /etc/yum.repos.d/epel.repo
+    
+    - name: Update all packages to the latest version
+      yum:
+        name: '*'
+        state: latest
+
+      # 必要パッケージのインストール
+    - name: Install necessary packages
+      yum:
+        name:
+          - make
+          - gcc-c++
+          - patch
+          - openssl-devel
+          - libyaml-devel
+          - libffi-devel
+          - libicu-devel
+          - libxml2
+          - libxslt
+          - libxml2-devel
+          - libxslt-devel
+          - zlib-devel
+          - readline-devel
+          - ImageMagick
+          - ImageMagick-devel
+          - epel-release
+          - nc
+        state: present #削除する場合はabsent
+
+      # デフォルトで入っているmariadbの削除
+    - name: Remove mariadb-libs
+      yum:
+        name: mariadb-libs
+        state: absent
+    
+  # mysql-community-develインストール
+    - name: Check if MySQL 8.0 community release RPM is installed
+      command:
+        cmd: rpm -q mysql80-community-release-el7-10
+      register: rpm_check   #コマンドの実行結果を変数rpm_checkに保存
+      failed_when: false    #失敗しても以降の処理を続行
+      changed_when: false   #どの結果も変更があったとはみなさない
+
+    - name: Install MySQL 8.0 community release RPM
+      command:
+        cmd: yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-10.noarch.rpm
+      when: rpm_check.rc != 0 #前タスクで変数に保存した結果によってこのタスクを実行するか制御
+
+    - name: Install mysql-community-devel
+      yum:
+        name: mysql-community-devel
+        state: present
+    
+    - name: Install mysql-community-server
+      yum:
+        name: mysql-community-server
+        state: present
+    # rbenvを使ったRubyのセットアップ
+    - name: Setup ruby using rbenv
+      block:
+        - name: Clone rbenv repository
+          git:
+            repo: https://github.com/rbenv/rbenv.git
+            dest: /home/ec2-user/.rbenv
+        
+          # 設定ファイルにPath設定追加
+        - name: Update .bash_profile for rbenv
+          lineinfile: #特定の行をファイルに追加または置換する
+            path: /home/ec2-user/.bash_profile #記述先を指定
+            #regexp: 指定された正規表現に一致する行がファイル内に存在する場合、lineの内容に置き換え
+            line: "{{ item }}" # with_itemsに定義した内容が入る
+          with_items: #同じ行がなければ追記する
+            - 'export PATH="$HOME/.rbenv/bin:$PATH"'
+            - 'eval "$(rbenv init -)"'
+
+          # ruby-buildをClone
+        - name: Clone ruby-build for rbenv
+          git:
+            repo: https://github.com/rbenv/ruby-build.git
+            dest: /home/ec2-user/.rbenv/plugins/ruby-build
+          
+          # Ruby3.1.2のインストール
+        - name: Install and set Ruby v3.1.2 as default if not already
+          shell: |
+            source /home/ec2-user/.bash_profile
+            if [[ $(rbenv global) != *3.1.2* ]]; then
+              rbenv install 3.1.2
+              rbenv global 3.1.2
+            fi
+          args:
+            creates: /home/ec2-user/.rbenv/versions/3.1.2
+          async: 3600
+          poll: 10
+        
+      # bundlerのインストール
+        - name: Install bundler gem
+          gem:
+            name: bundler
+            user_install: no
+            state: present
+            executable: "/home/ec2-user/.rbenv/shims/gem"
+      become: false    
+
+    - name: Setup Node.js using nvm
+      block:
+        - name: Clone nvm repository
+          git:
+            repo: https://github.com/creationix/nvm.git
+            dest: /home/ec2-user/.nvm
+
+        - name: Update .bashrc for nvm
+          lineinfile:
+            path: /home/ec2-user/.bashrc
+            line: "{{ item }}"
+          with_items:
+            - 'export NVM_DIR="$HOME/.nvm"'
+            - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+            - '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"'
+        
+        - name: Install and set Node.js v17.9.1 as default if not already
+          shell: |
+            source /home/ec2-user/.bashrc
+            if [[ $(nvm alias default) != *v17.9.1* ]]; then
+              nvm install v17.9.1
+              nvm alias default v17.9.1
+            fi
+          args:
+            creates: /home/ec2-user/.nvm/versions/node/v17.9.1
+          async: 3600
+          poll: 10
+     
+          # yarnのグローバルインストール
+        - name: Install yarn globally
+          npm:
+            name: yarn
+            global: yes
+            state: present
+      become: false
+
+    - name: Ensure /var/www directory exists
+      file:
+        path: /var/www
+        state: directory
+        mode: '0755'
+        owner: ec2-user
+        group: ec2-user
+
+    - name: Clone repository using git module
+      git:
+        repo: https://github.com/dende-h/raisetech-live8-sample-app.git
+        dest: /var/www/raisetech-live8-sample-app
+        force: yes
+        clone: yes
+        update: yes
+      become: false
+
+    # Nginxのインストール
+    - name: Install Nginx
+      yum:
+        name: nginx
+        state: present
+
+    # Nginxサービスの起動と自動起動の設定
+    - name: Ensure Nginx is started and enabled on boot
+      systemd:
+        name: nginx
+        state: started
+        enabled: true
+
+    # (オプション) Nginxの設定ファイルの配置 (変更がある場合のみ)
+    - name: Copy Nginx configuration file
+      copy:
+        src: /var/www/raisetech-live8-sample-app/raisetech-live8-sample-app.conf
+        dest: /etc/nginx/conf.d/default.conf
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: yes
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted

@@ -21,18 +21,18 @@ CloudWatchでメトリクスアラームを設定したイベントが記録さ�
 ### CloudWatchでアラームの設定
 - Unicornを停止してアプリにアクセスできない状態にしたとき
     ダッシュボード
-    ![unhealthy](./images/lecture06/CloudWatch_unhealthy_app2023-09-13.png)
+    ![unhealthy](/images/lecture06/CloudWatch_unhealthy_app2023-09-13.png)
 
     通知メール
-    ![alarm](./images/lecture06/unhealthy_alarm_mail2023-09-13.png)
+    ![alarm](/images/lecture06/unhealthy_alarm_mail2023-09-13.png)
 
 
 - Unicornを起動してアプリにアクセスできる状態にしたとき
     ダッシュボード
-    ![healthy](./images/lecture06/CloudWatch_healthy_app2023-09-13.png)
+    ![healthy](/images/lecture06/CloudWatch_healthy_app2023-09-13.png)
 
     通知メール
-    ![ok](./images/lecture06/healthy_alarm_mail2023-09-13.png)
+    ![ok](/images/lecture06/healthy_alarm_mail2023-09-13.png)
 
 ### Pricing calculaterでリソース利用料の見積り作成
 [見積へのリンク](https://calculator.aws/#/estimate?id=3f1ec588a6820fa05824d3c0dca652ca63877965)
@@ -47,5 +47,5 @@ CloudWatchでメトリクスアラームを設定したイベントが記録さ�
 ### マネジメントコンソールから自分の請求の確認
 **先月の請求とEC2のコスト**
 
-![all-cost](./images/lecture06/Billing2023-09-13.png)
-![ec2-cost](./images/lecture06/EC2cost2023-09-13.png)
+![all-cost](/images/lecture06/Billing2023-09-13.png)
+![ec2-cost](/images/lecture06/EC2cost2023-09-13.png)
