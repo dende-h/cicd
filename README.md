@@ -46,6 +46,8 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 
 ![diagram](/AWS-configuration-diagram/AWS課題構成図lecture13.drawio.png) 
 
+## How to use
+
 
 
 ### Raisetechの課題について
