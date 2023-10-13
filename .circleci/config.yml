@@ -20,12 +20,12 @@ workflows:
           # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
           mapping: |
             ServerSpec/.* run-serverspec true
-            .circleci/.* run-circleci true
+            .circleci/.* run-circleci false
             ansible/.* run-ansible true
             terraform/environments/development/.* run-development-terraform-build true
             terraform/modules/.* run-modules-terraform-build true
             ^((?!terraform/).)*$ run-raisetech-sample-config true
-          base-revision: lecture13
+          base-revision: main
           # this is the path of the configuration we should trigger once
           # path filtering and pipeline parameter value updates are
           # complete. In this case, we are using the parent dynamic

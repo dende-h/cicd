@@ -13,22 +13,22 @@
 ### 構成図
 ![diagram](/AWS-configuration-diagram/AWS課題構成図lecture13.drawio.png)
 ### terraformで環境構築を自動化
-[terraform/environments/development](https://github.com/dende-h/aws-ruby/tree/lecture13/terraform/environments/development)  
-[terraform/modules](https://github.com/dende-h/aws-ruby/tree/lecture13/terraform/modules)
+[terraform/environments/development](https://github.com/dende-h/aws-ruby/tree/main/terraform/environments/development)  
+[terraform/modules](https://github.com/dende-h/aws-ruby/tree/main/terraform/modules)
 
 ### Ansibleでプロビジョニング
-[ansible/inventories/development/hosts](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/inventories/development/hosts)  
-[ansible/playbooks/ec2_deploy.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy.yml)  
-[ansible/playbooks/ec2_deploy2.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/ansible/playbooks/ec2_deploy2.yml)  
-[ansible/templates](https://github.com/dende-h/aws-ruby/tree/lecture13/ansible/templates)
+[ansible/inventories/development/hosts](https://github.com/dende-h/aws-ruby/blob/main/ansible/inventories/development/hosts)  
+[ansible/playbooks/ec2_deploy.yml](https://github.com/dende-h/aws-ruby/blob/main/ansible/playbooks/ec2_deploy.yml)  
+[ansible/playbooks/ec2_deploy2.yml](https://github.com/dende-h/aws-ruby/blob/main/ansible/playbooks/ec2_deploy2.yml)  
+[ansible/templates](https://github.com/dende-h/aws-ruby/tree/main/ansible/templates)
 
 ### Server specでインフラテスト
-[ServerSpec/spec/hostname/sample_spec.rb](https://github.com/dende-h/aws-ruby/blob/lecture13/ServerSpec/spec/hostname/sample_spec.rb)  
-[ServerSpec/spec/spec_helper.rb](https://github.com/dende-h/aws-ruby/blob/lecture13/ServerSpec/spec/spec_helper.rb)
+[ServerSpec/spec/hostname/sample_spec.rb](https://github.com/dende-h/aws-ruby/blob/main/ServerSpec/spec/hostname/sample_spec.rb)  
+[ServerSpec/spec/spec_helper.rb](https://github.com/dende-h/aws-ruby/blob/main/ServerSpec/spec/spec_helper.rb)
 
 ### CircleCIで自動化
-[config.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/.circleci/config.yml)  
-[auto_deployment_config.yml](https://github.com/dende-h/aws-ruby/blob/lecture13/.circleci/auto_deployment_config.yml)
+[config.yml](https://github.com/dende-h/aws-ruby/blob/main/.circleci/config.yml)  
+[auto_deployment_config.yml](https://github.com/dende-h/aws-ruby/blob/main/.circleci/auto_deployment_config.yml)
 
 ### CircleCI実行結果
 **plan job(terraform)**  
@@ -290,7 +290,7 @@ chocolateyを使用してインストール実施
         PLAY RECAP *************************************************************************************************************
         13.231.107.81              : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
         ```
-        ![nginx-install](./images/lecture13/Nginx-install2023-10-05.png)
+        ![nginx-install](/images/lecture13/Nginx-install2023-10-05.png)
 
 - Docker内でterraform利用する際のインストール
     ```
