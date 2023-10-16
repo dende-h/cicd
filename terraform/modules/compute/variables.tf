@@ -41,6 +41,7 @@ variable "sec_group_for_ec2" {
 variable "keypair_name" {
   description = "The EC2 Key Pair to allow SSH access to the instance"
   type        = string
+  default     = "my_ec2_key_piar"
 }
 
 variable "volume_type" {
