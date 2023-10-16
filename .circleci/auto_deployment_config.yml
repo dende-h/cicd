@@ -56,7 +56,8 @@ jobs:
           command: |
             cd ./terraform/environments/development
             terraform init
-            terraform apply -auto-approve 
+            terraform apply -auto-approve \
+            -var "rds_password=$RDS_PASSWORD"
             # Terraformのアウトプットを取得
             mkdir -p /tmp/workspace
             echo $(terraform output -json) > /tmp/workspace/terraform-outputs.json
