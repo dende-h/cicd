@@ -83,7 +83,6 @@ module "database" {
   # rds_instance_class = "db.t3.micro"
   # rds_name = "terraformRds"
   # rds_username = "root"
-  # rds_password = ""
   # rds_parameter_group_name = "default.mysql8.0"
   # rds_port = 3306
 }
