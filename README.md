@@ -80,6 +80,11 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
     ![yaml](/images/readme/yaml.png)  
     ![terraform](/images/readme/terraform.png)  
   
+- CircleCIのSetup Projectからこのプロジェクトをセットアップする  
+  project settings →　Advanced → Enable dynamic config using setup workflowsの設定をONにしておいてください。  
+  ![setting](/images/readme/project_settings.png)  
+  ![dynamic_config](/images/readme/dynamic_config_sw.png) 
+  
 ##### 2. AWSのコンソールでEC2用のキーペアを作成(使えるキーペアがない場合)
 既存で利用できるEC2のssh接続用キーペアがない場合は作成します。  
 既存のものを使用する場合はこの手順は不要です。  

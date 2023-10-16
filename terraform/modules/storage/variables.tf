@@ -1,5 +1,5 @@
 variable "s3_bucket_name" {
   description = "The name of the S3 bucket."
   type        = string
-  default     = "terraform-amazon-s3"
+  default     = "my-s3-bucket-terraform-state"
 }
