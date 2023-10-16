@@ -20,10 +20,11 @@ workflows:
           # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
           mapping: |
             ServerSpec/.* run-serverspec true
-            .circleci/.* run-circleci false
+            .circleci/.* run-circleci true
             ansible/.* run-ansible true
             terraform/environments/development/.* run-development-terraform-build true
             terraform/modules/.* run-modules-terraform-build true
+            destroy/.* run-terraform-destroy true
             ^((?!terraform/).)*$ run-raisetech-sample-config true
           base-revision: main
           # this is the path of the configuration we should trigger once

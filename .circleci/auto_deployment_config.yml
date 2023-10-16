@@ -23,7 +23,9 @@ parameters:
   run-serverspec:
     type: boolean
     default: false 
-
+  run-terraform-destroy:
+    type: boolean
+    default: false
 executors:
   terraform:
     docker:
@@ -62,6 +64,17 @@ jobs:
           root: /tmp/workspace
           paths: 
             - terraform-outputs.json
+  
+  destroy:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: Terraform Destroy
+          command: |
+            cd ./terraform/environments/development
+            terraform init
+            terraform destroy -auto-approve 
 
   # setup-ec2
   ansible-playbook:
@@ -81,13 +94,6 @@ jobs:
         description: |
           The path of Ansible playbook
         type: string
-      private-key:
-        description: |
-          SSH private key file. The default value must be empty,
-          so do not store any value to this environment variable.
-          The data must be registered in base64 format
-        type: env_var_name
-        default: NONEXISTENT_ANSIBLE_SSH_KEY
     steps:
       - checkout
       - attach_workspace:
@@ -113,11 +119,7 @@ jobs:
           version: <<parameters.version>>
       - ansible/playbook:
           playbook-options: <<parameters.playbook-options>>
-          playbook: <<parameters.playbook>>
-          private-key: <<parameters.private-key>>          
-      # - run:
-      #     name: Run Ansible Playbook
-      #     command: ansible-playbook -i ./ansible/inventories/development/hosts ./ansible/playbooks/ec2_deploy.yml
+          playbook: <<parameters.playbook>>         
 
   # app-deploy
   sample-app-deploy:
@@ -137,13 +139,6 @@ jobs:
         description: |
           The path of Ansible playbook
         type: string
-      private-key:
-        description: |
-          SSH private key file. The default value must be empty,
-          so do not store any value to this environment variable.
-          The data must be registered in base64 format
-        type: env_var_name
-        default: NONEXISTENT_ANSIBLE_SSH_KEY
     steps:
       - checkout
       - attach_workspace:
@@ -172,10 +167,7 @@ jobs:
       - ansible/playbook:
           playbook-options: <<parameters.playbook-options>>
           playbook: <<parameters.playbook>>
-          private-key: <<parameters.private-key>>
-      # - run:
-      #     name: Run Ansible Playbook
-      #     command: ansible-playbook -i ./ansible/inventories/development/hosts ./ansible/playbooks/ec2_deploy2.yml
+
   cfn-lint:
     executor: python/default
     steps:
@@ -192,17 +184,11 @@ jobs:
       - image: circleci/ruby
     steps:
       - checkout
-      # - add_ssh_keys:
-      #     fingerprints:
-      #       - "${KEY_FINGERPRINT}"
       - attach_workspace:
           at: /tmp
       - run:
           name: Install jq
           command: sudo apt-get update && sudo apt-get install -y jq
-      # - run:
-      #     name: Set SSH Key Path
-      #     command: echo 'export SSH_PRIVATE_KEY_PATH=~/.ssh/id_rsa' >> $BASH_ENV
       - run:
           name: Set environment variable from JSON
           command: |
@@ -239,14 +225,12 @@ workflows:
           version: "2.10.7"
           playbook-options: '-i ./ansible/inventories/development/hosts'
           playbook:  ./ansible/playbooks/ec2_deploy.yml
-          private-key: AWS_PAIR_KEY
           requires:
             - apply
       - sample-app-deploy:
           version: "2.10.7"
           playbook-options: '-i ./ansible/inventories/development/hosts'
           playbook:  ./ansible/playbooks/ec2_deploy2.yml
-          private-key: AWS_PAIR_KEY
           requires:
             - ansible-playbook
       - server_spec:
@@ -259,4 +243,8 @@ workflows:
     when: << pipeline.parameters.run-raisetech-sample-config >>
     jobs:
       - cfn-lint
-
+  
+  terraform-destroy:
+    when: << pipeline.parameters.run-terraform-destroy >>
+    jobs:
+      - destroy
