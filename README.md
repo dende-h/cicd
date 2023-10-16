@@ -53,7 +53,7 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 ![diagram](/AWS-configuration-diagram/AWS課題構成図lecture13.drawio.png) 
 
 ## How to use
-下記の手順で環境の構築とアプリのデプロイを行うことができます。
+下記の手順で環境の構築とアプリのデプロイを行うことができます。  
 **前提条件**
 - CircleCIのアカウントを持っていること 
 - CircleCIのアカウントと紐付けられる自身のGitHubアカウントを持っていること
@@ -85,14 +85,15 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 既存のものを使用する場合はこの手順は不要です。  
 [ドキュメント](https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair)にしたがってキーペアを作成してください。
 ##### 3. AWSのコンソールでS3bucket(terraformの状態を管理するbucketを作成)
-このプロジェクトでは構築したterraformのリソースの状態をAmazonS3に保存します。
+このプロジェクトでは構築したterraformのリソースの状態をAmazonS3に保存します。  
 その保存のためのS3bucketを構築します。  
 [ドキュメント](https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/creating-bucket.html)にしたがってS3を作成してください。  
 名前とリージョン以外はdefault値でも大丈夫です。  
-名前はグローバルで一意なものを、命名規則にしたがって設定してください。リージョンは環境を構築するリージョンを選んでください。
+名前はグローバルで一意なものを、命名規則にしたがって設定してください。  
+リージョンは環境を構築するリージョンを選んでください。
 ##### 4. terraformに許可する権限を持ったIAMユーザーのアクセスキーとシークレットキーを作成
-既存の利用可能なアクセスキーとシークレットキーがある場合この手順は不要です。
-新規に作成する場合は[ドキュメント](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/id_credentials_access-keys.html) を読んで適切な権限を付与したユーザーを作成してください。
+既存の利用可能なアクセスキーとシークレットキーがある場合この手順は不要です。  
+新規に作成する場合は[ドキュメント](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/id_credentials_access-keys.html) を読んで適切な権限を付与したユーザーを作成してください。  
 削除前提で試すだけなら、```AdministratorAccess```でも大丈夫です。  
 アクセスキーとシークレットキーの漏洩に注意して下さい。
 ##### 5. CircleCIに必要な環境変数を登録する
