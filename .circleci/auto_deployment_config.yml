@@ -23,7 +23,9 @@ parameters:
   run-serverspec:
     type: boolean
     default: false 
-
+  run-terraform-destroy:
+    type: boolean
+    default: false
 executors:
   terraform:
     docker:
