@@ -100,5 +100,5 @@ module "database" {
 module "storage" {
   source = "../../modules/storage"
 # s3バケット名は自分で作成したS3の名前に上書きしてください。既に存在する名前の場合失敗します。
-  s3_bucket_name = "my-tfstate-s3bucket"
+  s3_bucket_name = "my-terraform-s3bkt"
 }
