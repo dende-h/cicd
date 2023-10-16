@@ -27,8 +27,11 @@ module "network" {
 module "security" {
   source = "../../modules/security"
   vpc_id = module.network.vpc_id
-# 必要に応じて変数をオーバーライドしてください
+
+# EC2のSSH接続を許可するIPアドレスを絞る場合は下記を変更してください。
   my_ip = ["0.0.0.0/0"] #指定したIPアドレス以外からの通信をブロックするように設定。自身のローカルPCのIPを指定するとセキュアです。
+
+# 必要に応じて変数をオーバーライドしてください
   # alb_sec_group_name = "alb-sec-terraform"
   # alb_sec_group_description = "security for alb access"
   # ec2_sec_group_name = "ec2-sec-terraform"
@@ -49,6 +52,7 @@ module "load_balancer" {
   alb_sec_group_id  = module.security.alb_sec_group_id
   port              = module.security.alb_ingress_port
   target_ec2        = module.compute.ec2_instance_id
+
 # 必要に応じて変数をオーバーライドしてください
   # alb_name = "terraform-alb"
   # alb_target = "terraform-alb-target"
@@ -57,14 +61,18 @@ module "load_balancer" {
 module "compute" {
   source            = "../../modules/compute"
   ec2_subnet1       = module.network.public_subnet1_id
-  sec_group_for_ec2 = [module.security.ec2_sec_group_id]
+  sec_group_for_ec2 = [module.security.ec2_sec_group_id] 
+#事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
+  keypair_name = <<"your-key-pair-name">>
+
 # 必要に応じて変数をオーバーライドしてください
+# 下記はdefault値です。
   # role_name = "terraform-ec2-IamRole"
   # policy_arns =  ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
   # profile_name = "terraform-ec2-instance-profile"
   # instance_type = "t2.micro"
   # ami = "ami-07d6bd9a28134d3b3"
-  keypair_name = <<"your-key-pair-name">> #事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
+  
   # volume_type = "gp2"
   # volume_size = 8
   # ec2_name = "terraform-ec2"
@@ -74,7 +82,9 @@ module "database" {
   source                     = "../../modules/database"
   subnet_ids                 = module.network.praivate_subnet_ids
   rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
-# 必要に応じて変数をオーバーライドしてください
+
+# 必要に応じて変数をオーバーライドしてください。
+# 下記はdefault値です。
   # subnet_group_name = "terraform-subnet-group"
   # rds_allocated_storage = 20
   # rads_storage_type = "gp2"
@@ -87,8 +97,8 @@ module "database" {
   # rds_port = 3306
 }
 
-# s3バケット名はグローバルに一意でなければならないので、自分で選んだ名前に上書きしてください。既に存在する名前の場合失敗します。
 module "storage" {
   source = "../../modules/storage"
+# s3バケット名は自分で作成したS3の名前に上書きしてください。既に存在する名前の場合失敗します。
   s3_bucket_name = << "your-s3-bucket-name" >>
 }
