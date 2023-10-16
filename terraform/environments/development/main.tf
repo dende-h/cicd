@@ -63,7 +63,7 @@ module "compute" {
   ec2_subnet1       = module.network.public_subnet1_id
   sec_group_for_ec2 = [module.security.ec2_sec_group_id] 
 #事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
-  keypair_name = <<"your-key-pair-name">>
+  keypair_name = "cicd-key"
 
 # 必要に応じて変数をオーバーライドしてください
 # 下記はdefault値です。
@@ -100,5 +100,5 @@ module "database" {
 module "storage" {
   source = "../../modules/storage"
 # s3バケット名は自分で作成したS3の名前に上書きしてください。既に存在する名前の場合失敗します。
-  s3_bucket_name = << "your-s3-bucket-name" >>
+  s3_bucket_name = "my-tfstate-s3bucket"
 }
