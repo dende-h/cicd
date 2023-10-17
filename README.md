@@ -267,12 +267,13 @@ module "storage" {
 ```keypair_name```と```s3_bucket_name```の二つは変更必須です。  
   
 
-
-
-
 ##### 7. 変更をコミットしGitHubにPushする 
 手順6の変更を保存したら、commitをリモートリポジトリにpushします。
 CircleCIのダッシュボードで```terraform-build-and-deploy```ワークフローが起動したか確認してください。
+
+##### 8. 構築したリソースの削除
+削除する際は```/destroy/destroy.txt```になにか変更を加えて、その変更をpushしてください。
+もしくは、ローカル環境にterraformをインストールして手動でdestroyコマンドを実施しても大丈夫です。
 
 ## Raisetechの課題について
 ##### Raisetechの課題は下記の原則のもと進めていきます

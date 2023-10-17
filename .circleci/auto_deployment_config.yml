@@ -26,6 +26,9 @@ parameters:
   run-terraform-destroy:
     type: boolean
     default: false
+  not-run-deploy:
+    type: boolean
+    default: true
 executors:
   terraform:
     docker:
@@ -216,7 +219,7 @@ workflows:
   # job is triggered.
   terraform-build-and-deploy:
     when: 
-      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>,<< pipeline.parameters.run-serverspec >>]
+      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>,<< pipeline.parameters.run-serverspec >>,<<pipeline.parameters.not-run-deploy>>]
     jobs:
       - plan          
       - apply:
