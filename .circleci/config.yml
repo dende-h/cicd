@@ -24,8 +24,7 @@ workflows:
             ansible/.* run-ansible true
             terraform/environments/development/.* run-development-terraform-build true
             terraform/modules/.* run-modules-terraform-build true
-            destroy/.* run-terraform-destroy true
-            destroy/.* not-run-deploy false
+            destroy/.* run-not-destroy false
             ^((?!terraform/).)*$ run-raisetech-sample-config true
           base-revision: main
           # this is the path of the configuration we should trigger once
