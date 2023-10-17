@@ -124,7 +124,7 @@ CircleCIの**ProjectSettings**に必要な環境変数を登録します。
 ![finger_print](/images/readme/finger_print.png)
   
   
-続いて同じprojectSettingsからEnvironment Variables → Add Environment Variableから環境変数を追加していきます  
+続いて同じ**projectSettings**から**Environment Variables → Add Environment Variable**から環境変数を追加していきます  
 下図のように4つの変数を登録します  
 ![add_env_var](/images/readme/add_env_var.png)  
   
@@ -159,7 +159,7 @@ terraform {
 ```
   
 
-下記の**```/terraform/environments/development/main.tf```**の変数を一部自身の環境に合わせて変更してください。  
+下記の```/terraform/environments/development/main.tf```の変数を一部自身の環境に合わせて変更してください。  
 
 ```hcl
 provider "aws" {
@@ -274,10 +274,10 @@ module "storage" {
 
 ##### 7. 変更をコミットしGitHubにPushする 
 手順6の変更を保存したら、commitをリモートリポジトリにpushします。
-CircleCIのダッシュボードで**```terraform-build-and-deploy```**ワークフローが起動したか確認してください。
+CircleCIのダッシュボードで```terraform-build-and-deploy```ワークフローが起動したか確認してください。
 
 ##### 8. 構築したリソースの削除
-削除する際は**```/destroy/destroy.txt```**になにか変更を加えて、その変更をpushしてください。
+削除する際は```/destroy/destroy.txt```になにか変更を加えて、その変更をpushしてください。
 もしくは、ローカル環境にterraformをインストールして手動でdestroyコマンドを実施しても大丈夫です。
 
 ## Raisetechの課題について
