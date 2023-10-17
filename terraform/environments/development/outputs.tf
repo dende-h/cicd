@@ -18,3 +18,8 @@ output "rds_password" {
   value       = module.database.rds_password
   sensitive   = true
 }
+
+output "s3_bucket_name" {
+  description = "The AmazonS3 bucket name"
+  value       = module.storage.s3_bucket_name
+}

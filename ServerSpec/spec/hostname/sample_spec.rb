@@ -3,6 +3,7 @@ require 'spec_helper'
 host_name = ENV['TARGET_HOST']
 alb_endpoint = ENV['ALB_ENDPOINT']
 rds_endpoint = ENV['RDS_ENDPOINT'].split(':')[0]
+s3_name = ENV['S3_NAME']
 
 # パッケージのインストール確認
 %w{
@@ -75,6 +76,6 @@ describe 'MySQL Command' do
 end
 
 # S3接続確認
-describe command("aws s3 ls s3://terraform-amazon-s3") do
+describe command("aws s3 ls s3://#{s3_name}") do
   its(:exit_status) { should eq 0 }
 end

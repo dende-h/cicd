@@ -56,8 +56,7 @@ jobs:
           command: |
             cd ./terraform/environments/development
             terraform init
-            terraform apply -auto-approve \
-            -var "rds_password=$RDS_PASSWORD"
+            terraform apply -auto-approve 
             # Terraformのアウトプットを取得
             mkdir -p /tmp/workspace
             echo $(terraform output -json) > /tmp/workspace/terraform-outputs.json
@@ -196,6 +195,7 @@ jobs:
             echo 'export TARGET_HOST=$(jq -r ".output_ec2_public_ip.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
             echo 'export ALB_ENDPOINT=$(jq -r ".output_alb_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
             echo 'export RDS_ENDPOINT=$(jq -r ".rds_endpoint.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
+            echo 'export S3_NAME=$(jq -r ".s3_bucket_name.value" /tmp/terraform-outputs.json)' >> $BASH_ENV
       - run:
           name: Change ServerSpec host folder name
           command: bash ./shell/change_folder_name.sh
