@@ -66,7 +66,7 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 3. [AWSのコンソールでS3bucket(terraformの状態を管理するbucketを作成)](#3-awsのコンソールでs3bucketterraformの状態を管理するbucketを作成)
 4. [terraformに許可する権限を持ったIAMユーザーのアクセスキーとシークレットキーを作成](#4-terraformに許可する権限を持ったiamユーザーのアクセスキーとシークレットキーを作成)
 5. [CircleCIに必要な環境変数を登録する](#5-circleciに必要な環境変数を登録する)
-6. [terraformの変数を自身の環境用にオーバーライドする](#6-terraformの変数を自身の環境用にオーバーライドする)
+6. [tfstate管理のS3bucketの指定と、terraformの変数を自身の環境用にオーバーライド](#6-tfstate管理のs3bucketの指定とterraformの変数を自身の環境用にオーバーライド)
 7. [変更をコミットしGitHubにPushする](#7-変更をコミットしgithubにpushする)   
   
 ##### 1. このリポジトリを自身のリポジトリにフォークして、CircleCIにセットアップする
@@ -140,8 +140,23 @@ KEY_FINGERPRINT
 TF_VAR_rds_password	
     構築するRDS/MySQLのパスワードを登録します。
   ```
-##### 6. terraformの変数を自身の環境用にオーバーライドする
-下記の```/teraform/environments/development/main.tf```の変数を一部自身の環境に合わせて変更してください。
+##### 6. tfstate管理のS3bucketの指定と、terraformの変数を自身の環境用にオーバーライド
+下記のtfstate管理のバックエンド設定```/terraform/environments/development/backend.tf```を書き換えてください
+```hcl
+terraform {
+  backend "s3" {
+    #下記を手順4で作成したS3の名前に書き換えてください
+    bucket         = <<"your-s3-bucket-name">>  
+    
+    key            = "development/terraform.tfstate"
+    region         = "ap-northeast-1"  
+    encrypt        = true 
+}
+}
+```
+  
+
+下記の```/terraform/environments/development/main.tf```の変数を一部自身の環境に合わせて変更してください。
 ```hcl
 provider "aws" {
   # リージョンを自身の利用しているものに設定してください
@@ -172,8 +187,11 @@ module "network" {
 module "security" {
   source = "../../modules/security"
   vpc_id = module.network.vpc_id
-# 必要に応じて変数をオーバーライドしてください
+
+# EC2のSSH接続を許可するIPアドレスを絞る場合は下記を変更してください。
   my_ip = ["0.0.0.0/0"] #指定したIPアドレス以外からの通信をブロックするように設定。自身のローカルPCのIPを指定するとセキュアです。
+
+# 必要に応じて変数をオーバーライドしてください
   # alb_sec_group_name = "alb-sec-terraform"
   # alb_sec_group_description = "security for alb access"
   # ec2_sec_group_name = "ec2-sec-terraform"
@@ -194,6 +212,7 @@ module "load_balancer" {
   alb_sec_group_id  = module.security.alb_sec_group_id
   port              = module.security.alb_ingress_port
   target_ec2        = module.compute.ec2_instance_id
+
 # 必要に応じて変数をオーバーライドしてください
   # alb_name = "terraform-alb"
   # alb_target = "terraform-alb-target"
@@ -202,19 +221,18 @@ module "load_balancer" {
 module "compute" {
   source            = "../../modules/compute"
   ec2_subnet1       = module.network.public_subnet1_id
-  sec_group_for_ec2 = [module.security.ec2_sec_group_id]
+  sec_group_for_ec2 = [module.security.ec2_sec_group_id] 
+#事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
+  keypair_name = <<"your-key-pair-name">>
+
 # 必要に応じて変数をオーバーライドしてください
+# 下記はdefault値です。
   # role_name = "terraform-ec2-IamRole"
   # policy_arns =  ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
   # profile_name = "terraform-ec2-instance-profile"
   # instance_type = "t2.micro"
   # ami = "ami-07d6bd9a28134d3b3"
-
-
-#事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
-  keypair_name = <<"your-key-pair-name">> 
-
-
+  
   # volume_type = "gp2"
   # volume_size = 8
   # ec2_name = "terraform-ec2"
@@ -224,7 +242,9 @@ module "database" {
   source                     = "../../modules/database"
   subnet_ids                 = module.network.praivate_subnet_ids
   rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
-# 必要に応じて変数をオーバーライドしてください
+  rds_password = var.rds_password
+# 必要に応じて変数をオーバーライドしてください。
+# 下記はdefault値です。
   # subnet_group_name = "terraform-subnet-group"
   # rds_allocated_storage = 20
   # rads_storage_type = "gp2"
@@ -239,15 +259,10 @@ module "database" {
 
 module "storage" {
   source = "../../modules/storage"
-
-
-# s3バケット名を自身で決めた名前に上書きしてください。既に存在する名前の場合失敗します。
-  s3_bucket_name = << "your-s3-bucket-name" >>
-
-
-}  
-
-
+# s3バケット名は自分で作成したいS3の名前に上書きしてください。既に存在する名前の場合失敗します。
+# 手順4で作成したバケット名ではありません。使用しないでください。
+  s3_bucket_name = <<"yuur-s3bucket-name">>
+}
 ```
 ```keypair_name```と```s3_bucket_name```の二つは変更必須です。  
   

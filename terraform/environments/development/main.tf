@@ -63,7 +63,7 @@ module "compute" {
   ec2_subnet1       = module.network.public_subnet1_id
   sec_group_for_ec2 = [module.security.ec2_sec_group_id] 
 #事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
-  keypair_name = "cicd-key"
+  keypair_name = <<"your-key-pair-name">>
 
 # 必要に応じて変数をオーバーライドしてください
 # 下記はdefault値です。
@@ -99,6 +99,7 @@ module "database" {
 
 module "storage" {
   source = "../../modules/storage"
-# s3バケット名は自分で作成したS3の名前に上書きしてください。既に存在する名前の場合失敗します。
-  s3_bucket_name = "my-terraform-s3bkt"
+# s3バケット名は自分で作成したいS3の名前に上書きしてください。既に存在する名前の場合失敗します。
+# 手順4で作成したバケット名ではありません。使用しないでください。
+  s3_bucket_name = <<"yuur-s3bucket-name">>
 }
