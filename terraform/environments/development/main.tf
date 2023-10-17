@@ -82,7 +82,7 @@ module "database" {
   source                     = "../../modules/database"
   subnet_ids                 = module.network.praivate_subnet_ids
   rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
-  rds_password = var.rds_password
+  rds_password = var.rds_password #環境変数から取得している
 # 必要に応じて変数をオーバーライドしてください。
 # 下記はdefault値です。
   # subnet_group_name = "terraform-subnet-group"
