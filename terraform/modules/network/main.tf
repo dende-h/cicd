@@ -65,7 +65,7 @@ resource "aws_route_table" "terraform_private_subnet_route_table1" {
   vpc_id = aws_vpc.terraform_vpc.id
 
   tags = {
-    Name = var.praivate_subnet_route_table_name1
+    Name = var.private_subnet_route_table_name1
   }
 }
 
@@ -73,7 +73,7 @@ resource "aws_route_table" "terraform_private_subnet_route_table2" {
   vpc_id = aws_vpc.terraform_vpc.id
 
   tags = {
-    Name = var.praivate_subnet_route_table_name2
+    Name = var.private_subnet_route_table_name2
   }
 }
 
@@ -84,7 +84,7 @@ resource "aws_subnet" "terraform_private_subnet1" {
   availability_zone       = element(data.aws_availability_zones.available.names, 0)
 
   tags = {
-    Name = var.praivate_subnet1_name
+    Name = var.private_subnet1_name
   }
 }
 
@@ -95,7 +95,7 @@ resource "aws_subnet" "terraform_private_subnet2" {
   availability_zone       = element(data.aws_availability_zones.available.names, 1)
 
   tags = {
-    Name = var.praivate_subnet2_name
+    Name = var.private_subnet2_name
   }
 }
 

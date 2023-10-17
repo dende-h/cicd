@@ -14,12 +14,12 @@ module "network" {
   # public_subnet2_cidr_block = "10.0.0.16/28"
   # public_subnet1_name = "terraform-public-subnet1"
   # public_subnet2_name = "terraform-public-subnet2"
-  # praivate_subnet_route_table_name1 = "terraform-praiavte-RouteTable1"
-  # praivate_subnet_route_table_name2 = "terraform-praiavte-RouteTable2"
+  # private_subnet_route_table_name1 = "terraform-praiavte-RouteTable1"
+  # private_subnet_route_table_name2 = "terraform-praiavte-RouteTable2"
   # private_subnet1_cidr_block =  "10.0.0.128/28"
   # private_subnet2_cidr_block = "10.0.0.144/28"
-  # praivate_subnet1_name = "terraform-praivate-subnet1"
-  # praivate_subnet2_name = "terraform-praivate-subnet2"
+  # private_subnet1_name = "terraform-praivate-subnet1"
+  # private_subnet2_name = "terraform-praivate-subnet2"
   # aws_region = "ap-northeast-1"
   # vpc_endpoint_name = "terraform_vpc_endpoint"
 }
@@ -80,14 +80,14 @@ module "compute" {
 
 module "database" {
   source                     = "../../modules/database"
-  subnet_ids                 = module.network.praivate_subnet_ids
+  subnet_ids                 = module.network.private_subnet_ids
   rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
   rds_password = var.rds_password #環境変数から取得している
 # 必要に応じて変数をオーバーライドしてください。
 # 下記はdefault値です。
   # subnet_group_name = "terraform-subnet-group"
   # rds_allocated_storage = 20
-  # rads_storage_type = "gp2"
+  # rds_storage_type = "gp2"
   # rds_engine = "mysql"
   # rds_engine_version = "8.0.33"
   # rds_instance_class = "db.t3.micro"
@@ -101,5 +101,5 @@ module "storage" {
   source = "../../modules/storage"
 # s3バケット名は自分で作成したいS3の名前に上書きしてください。既に存在する名前の場合失敗します。
 # 手順4で作成したバケット名ではありません。使用しないでください。
-  s3_bucket_name = <<"yuur-s3bucket-name">>
+  s3_bucket_name = <<"your-s3bucket-name">>
 }

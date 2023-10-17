@@ -11,6 +11,6 @@ output "public_subnet2_id" {
   value = aws_subnet.terraform_public_subnet2.id
 }
 
-output "praivate_subnet_ids" {
+output "private_subnet_ids" {
   value = [aws_subnet.terraform_private_subnet1.id, aws_subnet.terraform_private_subnet2.id]
 }

@@ -1,6 +1,6 @@
 # RaiseTech課題用リポジトリ
 このリポジトリは**RaiseTechのAWSフルコースの提出課題用**に作成されました。
-lecture.mdファイルは課題を通して学んだことの証跡となります。
+```lecture.md```ファイルは課題を通して学んだことの証跡となります。
 
 ## 目次
 - [取り組み内容](#取り組み内容)
@@ -9,12 +9,12 @@ lecture.mdファイルは課題を通して学んだことの証跡となりま�
 - [RaiseTechの課題について](#raisetechの課題について)
 
 ## 取り組み内容
-取り組みは主に下記の5つになります。
-- AWSのVPC、EC2、RDSなどを使った基本的なクラウドインフラ環境の手動構築
-- 構築した環境へRailsアプリをデプロイ(アプリは作成済みのサンプルを使用)
-- 同じ環境をCloudfomationによる自動構築
-- ServerSpecでインフラ環境の自動テスト
-- CircleCIやAnsibleを使って、構築、環境セットアップ、サーバーテストを自動化したCI/CD環境の構築
+取り組みは主に**下記の5つ**になります。
+- **AWS**のVPC、EC2、RDSなどを使った基本的なクラウドインフラ環境の手動構築
+- 構築した環境へ**Railsアプリをデプロイ**(アプリは作成済みのサンプルを使用)
+- 同じ環境を**Cloudfomation**による自動構築
+- **ServerSpec**でインフラ環境の自動テスト
+- **CircleCI**や**Ansible**を使って、構築、環境セットアップ、サーバーテストを自動化したCI/CD環境の構築
 
 ## 成果物
 ### 手動構築とRailsアプリのデプロイ
@@ -55,9 +55,9 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 ## How to use
 下記の手順で環境の構築とアプリのデプロイを行うことができます。  
 **前提条件**
-- CircleCIのアカウントを持っていること 
-- CircleCIのアカウントと紐付けられる自身のGitHubアカウントを持っていること
-- AWSのアカウントを持っており、手動でリソースの構築ができること
+- [CircleCI](https://circleci.com/ja/)のアカウントを持っていること 
+- [CircleCI](https://circleci.com/ja/)のアカウントと紐付けられる自身の[GitHub](https://github.com/)アカウントを持っていること
+- [AWS](https://aws.amazon.com/jp/)のアカウントを持っており、手動でリソースの構築ができること
     - 今回の手順ではEC2キーペアとS3Bucketの手動構築が必要
   
 **設定手順**
@@ -81,7 +81,7 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
     ![terraform](/images/readme/terraform.png)  
   
 - CircleCIのSetup Projectからこのプロジェクトをセットアップする  
-  project settings →　Advanced → Enable dynamic config using setup workflowsの設定をONにしておいてください。  
+  project **settings →　Advanced → Enable dynamic config using setup workflows**の設定を**ON**にしておいてください。  
   ![setting](/images/readme/project_settings.png)  
   ![dynamic_config](/images/readme/dynamic_config_sw.png) 
   
@@ -90,7 +90,7 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 既存のものを使用する場合はこの手順は不要です。  
 [ドキュメント](https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair)にしたがってキーペアを作成してください。
 ##### 3. AWSのコンソールでS3bucket(terraformの状態を管理するbucketを作成)
-このプロジェクトでは構築したterraformのリソースの状態をAmazonS3に保存します。  
+このプロジェクトでは構築した**terraformのリソースの状態をAmazonS3に保存**します。  
 その保存のためのS3bucketを構築します。  
 [ドキュメント](https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/creating-bucket.html)にしたがってS3を作成してください。  
 名前とリージョン以外はdefault値でも大丈夫です。  
@@ -102,10 +102,10 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 削除前提で試すだけなら、```AdministratorAccess```でも大丈夫です。  
 アクセスキーとシークレットキーの漏洩に注意して下さい。
 ##### 5. CircleCIに必要な環境変数を登録する
-CircleCIのProjectSettingsに必要な環境変数を登録します。  
+CircleCIの**ProjectSettings**に必要な環境変数を登録します。  
 ![project_settings](/images/readme/project_settings.png)  
   
-ProjectSetteingsからSSH Keys → Addtional SSH keys → Add SSH keyへ進んで2の手順でローカルに保存した秘密鍵の中身をコピーして追加します。
+**ProjectSetteings**から**SSH Keys → Addtional SSH keys → Add SSH key**へ進んで手順2でローカルに保存した秘密鍵の中身をコピーして追加します。
 ![add_btn](/images/readme/add_ssh_btn.png)  
 ![add_key](/images/readme/add_ssh_key.png)  
   
@@ -113,12 +113,13 @@ ProjectSetteingsからSSH Keys → Addtional SSH keys → Add SSH keyへ進ん�
 秘密鍵の文字列は下記のように全文をコピーして貼り付けてください。  
 ホスト名はblankでも大丈夫です。  
 ```
------BEGIN OPENSSH PRIVATE KEY-----
+  -----BEGIN OPENSSH PRIVATE KEY-----
 
-ssh key strings
+  ssh key strings
 
------END OPENSSH PRIVATE KEY-----
+  -----END OPENSSH PRIVATE KEY-----
 ```
+
 登録後の画面で表示されるFingerPrintをコピーしておいてください。  
 ![finger_print](/images/readme/finger_print.png)
   
@@ -127,7 +128,7 @@ ssh key strings
 下図のように4つの変数を登録します  
 ![add_env_var](/images/readme/add_env_var.png)  
   
-  ```
+```
 AWS_ACCESS_KEY_ID
     手順4で作成したAWSのIAMユーザーのアクセスキーを登録します
 
@@ -139,7 +140,9 @@ KEY_FINGERPRINT
 
 TF_VAR_rds_password	
     構築するRDS/MySQLのパスワードを登録します。
-  ```
+```  
+
+  
 ##### 6. tfstate管理のS3bucketの指定と、terraformの変数を自身の環境用にオーバーライド
 下記のtfstate管理のバックエンド設定```/terraform/environments/development/backend.tf```を書き換えてください
 ```hcl
@@ -156,7 +159,8 @@ terraform {
 ```
   
 
-下記の```/terraform/environments/development/main.tf```の変数を一部自身の環境に合わせて変更してください。
+下記の**```/terraform/environments/development/main.tf```**の変数を一部自身の環境に合わせて変更してください。  
+
 ```hcl
 provider "aws" {
   # リージョンを自身の利用しているものに設定してください
@@ -174,12 +178,12 @@ module "network" {
   # public_subnet2_cidr_block = "10.0.0.16/28"
   # public_subnet1_name = "terraform-public-subnet1"
   # public_subnet2_name = "terraform-public-subnet2"
-  # praivate_subnet_route_table_name1 = "terraform-praiavte-RouteTable1"
-  # praivate_subnet_route_table_name2 = "terraform-praiavte-RouteTable2"
+  # private_subnet_route_table_name1 = "terraform-praiavte-RouteTable1"
+  # private_subnet_route_table_name2 = "terraform-praiavte-RouteTable2"
   # private_subnet1_cidr_block =  "10.0.0.128/28"
   # private_subnet2_cidr_block = "10.0.0.144/28"
-  # praivate_subnet1_name = "terraform-praivate-subnet1"
-  # praivate_subnet2_name = "terraform-praivate-subnet2"
+  # private_subnet1_name = "terraform-praivate-subnet1"
+  # private_subnet2_name = "terraform-praivate-subnet2"
   # aws_region = "ap-northeast-1"
   # vpc_endpoint_name = "terraform_vpc_endpoint"
 }
@@ -240,14 +244,14 @@ module "compute" {
 
 module "database" {
   source                     = "../../modules/database"
-  subnet_ids                 = module.network.praivate_subnet_ids
+  subnet_ids                 = module.network.private_subnet_ids
   rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
-  rds_password = var.rds_password
+  rds_password = var.rds_password #環境変数から取得している
 # 必要に応じて変数をオーバーライドしてください。
 # 下記はdefault値です。
   # subnet_group_name = "terraform-subnet-group"
   # rds_allocated_storage = 20
-  # rads_storage_type = "gp2"
+  # rds_storage_type = "gp2"
   # rds_engine = "mysql"
   # rds_engine_version = "8.0.33"
   # rds_instance_class = "db.t3.micro"
@@ -261,18 +265,19 @@ module "storage" {
   source = "../../modules/storage"
 # s3バケット名は自分で作成したいS3の名前に上書きしてください。既に存在する名前の場合失敗します。
 # 手順4で作成したバケット名ではありません。使用しないでください。
-  s3_bucket_name = <<"yuur-s3bucket-name">>
+  s3_bucket_name = <<"your-s3bucket-name">>
 }
 ```
-```keypair_name```と```s3_bucket_name```の二つは変更必須です。  
+
+**```keypair_name```と```s3_bucket_name```の二つは変更必須です。**  
   
 
 ##### 7. 変更をコミットしGitHubにPushする 
 手順6の変更を保存したら、commitをリモートリポジトリにpushします。
-CircleCIのダッシュボードで```terraform-build-and-deploy```ワークフローが起動したか確認してください。
+CircleCIのダッシュボードで**```terraform-build-and-deploy```**ワークフローが起動したか確認してください。
 
 ##### 8. 構築したリソースの削除
-削除する際は```/destroy/destroy.txt```になにか変更を加えて、その変更をpushしてください。
+削除する際は**```/destroy/destroy.txt```**になにか変更を加えて、その変更をpushしてください。
 もしくは、ローカル環境にterraformをインストールして手動でdestroyコマンドを実施しても大丈夫です。
 
 ## Raisetechの課題について

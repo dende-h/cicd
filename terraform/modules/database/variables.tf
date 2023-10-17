@@ -15,7 +15,7 @@ variable "rds_allocated_storage" {
   default     = 20
 }
 
-variable "rads_storage_type" {
+variable "rds_storage_type" {
   description = "The type of storage to use for the RDS instance. E.g., 'gp2', 'io1', 'standard'."
   type        = string
   default     = "gp2"
