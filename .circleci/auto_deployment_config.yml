@@ -247,6 +247,8 @@ workflows:
     jobs:
       - cfn-lint
   
+  # when pipeline parameter, run-terraform-destroy is true, the
+  # job is triggered.
   terraform-destroy:
     when: << pipeline.parameters.run-terraform-destroy >>
     jobs:
