@@ -23,9 +23,9 @@ parameters:
   run-serverspec:
     type: boolean
     default: false 
-  run-not-destroy:
+  run-terraform-destroy:
     type: boolean
-    default: true
+    default: false
 executors:
   terraform:
     docker:
@@ -217,7 +217,7 @@ workflows:
   terraform-build-and-deploy:
     when: 
       and:
-        - <<pipeline.parameters.run-not-destroy>>
+        - not: <<pipeline.parameters.run-terraform-destroy>>
         - or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>,<< pipeline.parameters.run-serverspec >>]
     jobs:
       - plan          
@@ -248,7 +248,6 @@ workflows:
       - cfn-lint
   
   terraform-destroy:
-    when: 
-      not: << pipeline.parameters.run-not-destroy >>
+    when: << pipeline.parameters.run-terraform-destroy >>
     jobs:
       - destroy
