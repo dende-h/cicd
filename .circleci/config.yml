@@ -14,7 +14,7 @@ workflows:
     jobs:
       # the path-filtering/filter job determines which pipeline
       - path-filtering/filter:
-          name: check-updated-files
+          name: merge-updated-files
           # 3-column, whitespace-delimited mapping. One mapping per
           # line:
           # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
@@ -32,7 +32,7 @@ workflows:
               only:
                 - main
       - path-filtering/filter:
-          name: merge-updated-files
+          name: check-updated-files
           mapping: |
             .circleci/.* run-circleci true
           base-revision: dev # 自身のブランチ名に変更してください。
