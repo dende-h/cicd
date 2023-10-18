@@ -42,7 +42,7 @@ jobs:
             - plan-output.json
 
   diff-check:
-    executor: terraform
+    executor: ansible
     steps:
       - checkout
       - attach_workspace:
