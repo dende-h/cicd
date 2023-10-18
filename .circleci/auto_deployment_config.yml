@@ -59,7 +59,7 @@ jobs:
               circleci-agent step halt
             fi
       - run:
-          command: echo "changes"
+          command: echo "Resource changes exist."
 
   apply:
     executor: terraform

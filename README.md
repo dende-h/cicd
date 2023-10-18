@@ -68,13 +68,18 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 5. [CircleCIに必要な環境変数を登録する](#5-circleciに必要な環境変数を登録する)
 6. [tfstate管理のS3bucketの指定と、terraformの変数を自身の環境用にオーバーライド](#6-tfstate管理のs3bucketの指定とterraformの変数を自身の環境用にオーバーライド)
 7. [変更をコミットしGitHubにPushする](#7-変更をコミットしgithubにpushする)   
+8. [mainブランチにmergeする](#8-mainブランチにmergeする)
+9. [構築したリソースの削除](#9-構築したリソースの削除)
   
 ##### 1. このリポジトリを自身のリポジトリにフォークして、CircleCIにセットアップする
 - このリポジトリを下記のボタンから自身のリポジトリにForkします。  
     ![fork](/images/readme/fork.png)  
   
-- Forkしたリポジトリを自身のローカル環境にCloneして変更してください。  
+- Forkしたリポジトリを自身のローカル環境にCloneしてください。  
     ![clone](/images/readme/clone.png)  
+
+- ```git switch -c dev```でdevという名前のブランチを切って作業してください。
+    ![git](/images/readme/gitswich.png)
   
 - VScodeを使用する場合下記の拡張機能をインストールして有効化してください。  
     ![yaml](/images/readme/yaml.png)  
@@ -150,7 +155,7 @@ TF_VAR_keypair_name
 TF_VAR_s3_bucket_name
     appのストレージとなるS3Bucketの名前を登録します
 
-TF_VAR_tfstate_storage
+TFSTATE_STORAGE
     tfstateを保存するために手順3で作成したS3Bucketの名前を登録します
 ```  
 
@@ -270,11 +275,28 @@ module "storage" {
 
 ##### 7. 変更をコミットしGitHubにPushする 
 手順6の変更を保存したら、commitをリモートリポジトリにpushします。
-CircleCIのダッシュボードで```terraform-build-and-deploy```ワークフローが起動したか確認してください。
+CircleCIのダッシュボードで```terraform-plan```ワークフローが起動したか確認してください。
 
-##### 8. 構築したリソースの削除
-削除する際は```/destroy/destroy.txt```になにか変更を加えて、その変更をpushしてください。
-もしくは、ローカル環境にterraformをインストールして手動でdestroyコマンドを実施しても大丈夫です。
+##### 8. mainブランチにmergeする
+```terraform-plan```ワークフローが成功しているのを確認し、変更をmainブランチにmergeするとデプロイが始まります。
+初回の構築では20分程はかかるかと思います。
+
+##### 9. 構築したリソースの削除
+削除する際は```/.circleci/auto_deployment_config```内の```run-terraform-destroy```パラメータをtrueに書き換えてください。
+```yaml
+parameters:
+  run-development-terraform-build:
+    type: boolean
+    default: false
+  run-circleci: 
+    type: boolean
+    default: false 
+  run-terraform-destroy:
+    type: boolean
+    default: false #ここをtrueに変更後にPushするとterraform destroyを実施するジョブが走ります。
+```
+この状態で変更をPushするとterraform -destroyが走りリソースが削除されます。
+※S3bucket内にデータがあると削除が失敗します。その際は手動で削除してください。
 
 ## Raisetechの課題について
 ##### Raisetechの課題は下記の原則のもと進めていきます
