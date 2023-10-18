@@ -21,13 +21,29 @@ workflows:
           mapping: |
             .circleci/.* run-circleci true
             terraform/.* run-development-terraform-build true
-          base-revision: destroy
+          base-revision: main
           # this is the path of the configuration we should trigger once
           # path filtering and pipeline parameter value updates are
           # complete. In this case, we are using the parent dynamic
           # configuration itself.
           config-path: .circleci/auto_deployment_config.yml
-
-      
+          filters:
+            branches:
+              only:
+                - main
+      - path-filtering/filter:
+          name: marge-updated-files
+          mapping: |
+            .circleci/.* run-circleci true
+          base-revision: dev
+          # this is the path of the configuration we should trigger once
+          # path filtering and pipeline parameter value updates are
+          # complete. In this case, we are using the parent dynamic
+          # configuration itself.
+          config-path: .circleci/auto_deployment_config.yml
+          filters:
+            branches:
+              only:
+                - dev
 
 

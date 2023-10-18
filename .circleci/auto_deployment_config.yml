@@ -207,33 +207,64 @@ jobs:
 
 
 workflows:
-  # when pipeline parameter, run-development-terraform-build is true, the
-  # job is triggered.
+  # devブランチでdestroyパラメータがfalseかつ、terraformかCircleCIの設定ファイルに変更が合った時に走るワークフロー
+  terraform-plan:
+    when: 
+      and:
+        - not: <<pipeline.parameters.run-terraform-destroy>>
+        - or: [<< pipeline.parameters.run-development-terraform-build >>,<< pipeline.parameters.run-circleci >>]
+    jobs:
+      - plan: 
+          filters:  
+            branches:
+              only:
+                - dev      
+  # mainブランチでdestroyパラメータがfalseかつ、terraformかCircleCIの設定ファイルに変更が合った時に走るワークフロー
   terraform-build-and-deploy:
     when: 
       and:
         - not: <<pipeline.parameters.run-terraform-destroy>>
         - or: [<< pipeline.parameters.run-development-terraform-build >>,<< pipeline.parameters.run-circleci >>]
     jobs:
-      - plan          
-      # - apply:
-      #     requires:
-      #       - plan
-      # - ansible-playbook:
-      #     version: "2.10.7"
-      #     playbook-options: '-i ./ansible/inventories/development/hosts'
-      #     playbook:  ./ansible/playbooks/ec2_deploy.yml
-      #     requires:
-      #       - apply
-      # - sample-app-deploy:
-      #     version: "2.10.7"
-      #     playbook-options: '-i ./ansible/inventories/development/hosts'
-      #     playbook:  ./ansible/playbooks/ec2_deploy2.yml
-      #     requires:
-      #       - ansible-playbook
-      # - server_spec:
-      #     requires:
-      #       - sample-app-deploy
+      - plan: 
+          filters:  
+            branches:
+              only:
+                - main        
+      - apply:
+          requires:
+            - plan
+          filters:  
+            branches:
+              only:
+                - main
+      - ansible-playbook:
+          version: "2.10.7"
+          playbook-options: '-i ./ansible/inventories/development/hosts'
+          playbook:  ./ansible/playbooks/ec2_deploy.yml
+          requires:
+            - apply
+          filters:   
+            branches:
+              only:
+                - main
+      - sample-app-deploy:
+          version: "2.10.7"
+          playbook-options: '-i ./ansible/inventories/development/hosts'
+          playbook:  ./ansible/playbooks/ec2_deploy2.yml
+          requires:
+            - ansible-playbook
+          filters:   
+            branches:
+              only:
+                - main
+      - server_spec:
+          requires:
+            - sample-app-deploy
+          filters:   
+            branches:
+              only:
+                - main
 
   # # when pipeline parameter, run-raisetech-sample-config is true, the
   # # job is triggered.
@@ -242,8 +273,7 @@ workflows:
   #   jobs:
   #     - cfn-lint
   
-  # when pipeline parameter, run-terraform-destroy is true, the
-  # job is triggered.
+  # destroyのパラメータをtrueにすると走るパラメータ
   terraform-destroy:
     when: << pipeline.parameters.run-terraform-destroy >>
     jobs:
