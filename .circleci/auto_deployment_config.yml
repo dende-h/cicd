@@ -87,7 +87,7 @@ jobs:
           name: Terraform Destroy
           command: |
             cd ./terraform/environments/development
-            terraform init
+            terraform init -backend-config="bucket=${TFSTATE_STORAGE}"
             terraform destroy -auto-approve 
 
   # setup-ec2
