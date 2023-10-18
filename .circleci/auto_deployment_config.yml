@@ -58,6 +58,8 @@ jobs:
               echo "No changes detected. Exiting."
               circleci-agent step halt
             fi
+      - run:
+          command: echo "changes"
 
   apply:
     executor: terraform
@@ -235,7 +237,14 @@ workflows:
           filters:  
             branches:
               only:
-                - dev      
+                - dev
+      - diff-check:
+          requires:
+            - plan
+          filters:  
+            branches:
+              only:
+                - dev    
   # mainブランチでdestroyパラメータがfalseかつ、terraformかCircleCIの設定ファイルに変更が合った時に走るワークフロー
   terraform-build-and-deploy:
     when: 
