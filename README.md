@@ -125,7 +125,7 @@ CircleCIの**ProjectSettings**に必要な環境変数を登録します。
   
   
 続いて同じ**projectSettings**から**Environment Variables → Add Environment Variable**から環境変数を追加していきます  
-下図のように4つの変数を登録します  
+下図のように6つの変数を登録します  
 ![add_env_var](/images/readme/add_env_var.png)  
   
 ```
@@ -140,26 +140,24 @@ KEY_FINGERPRINT
 
 TF_VAR_rds_password	
     構築するRDS/MySQLのパスワードを登録します。
+
+TF_VAR_keypair_name 
+    ssh接続するための秘密鍵のファイル名を登録します
+
+※下記の二つはどちらもS3Bucketの名前ですが同じ名前の指定はできません。
+※S3bucketはグローバルで一意な名前である必要があり、既存で同盟のBucketが存在する場合は構築が失敗します
+
+TF_VAR_s3_bucket_name
+    appのストレージとなるS3Bucketの名前を登録します
+
+TF_VAR_tfstate_storage
+    tfstateを保存するために手順3で作成したS3Bucketの名前を登録します
 ```  
 
   
-##### 6. tfstate管理のS3bucketの指定と、terraformの変数を自身の環境用にオーバーライド
-下記のtfstate管理のバックエンド設定```/terraform/environments/development/backend.tf```を書き換えてください
-```hcl
-terraform {
-  backend "s3" {
-    #下記を手順4で作成したS3の名前に書き換えてください
-    bucket         = <<"your-s3-bucket-name">>  
-    
-    key            = "development/terraform.tfstate"
-    region         = "ap-northeast-1"  
-    encrypt        = true 
-}
-}
-```
-  
-
-下記の```/terraform/environments/development/main.tf```の変数を一部自身の環境に合わせて変更してください。  
+##### 6. terraformの変数を自身の環境用にオーバーライド(必要があれば)
+下記の```/terraform/environments/development/main.tf```の変数を指定することでオーバーライドできます。  
+オーバーライドしない場合default値で動作します。  
 
 ```hcl
 provider "aws" {
@@ -226,8 +224,7 @@ module "compute" {
   source            = "../../modules/compute"
   ec2_subnet1       = module.network.public_subnet1_id
   sec_group_for_ec2 = [module.security.ec2_sec_group_id] 
-#事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
-  keypair_name = <<"your-key-pair-name">>
+  keypair_name = var.keypair_name #環境変数から取得している
 
 # 必要に応じて変数をオーバーライドしてください
 # 下記はdefault値です。
@@ -263,9 +260,8 @@ module "database" {
 
 module "storage" {
   source = "../../modules/storage"
-# s3バケット名は自分で作成したいS3の名前に上書きしてください。既に存在する名前の場合失敗します。
-# 手順4で作成したバケット名ではありません。使用しないでください。
-  s3_bucket_name = <<"your-s3bucket-name">>
+  # グローバルで一意な名前かつ命名規則に従っていない場合失敗します。
+  s3_bucket_name = var.s3_bucket_name #環境変数から取得している
 }
 ```
 
