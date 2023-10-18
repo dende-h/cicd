@@ -4,7 +4,7 @@ variable "rds_password" {
   default     = ""
 }
 
-variable "var.s3_bucket_name" {
+variable "s3_bucket_name" {
   description = "Name of the new S3bucket to be built"
   type        = string
   default     = ""
