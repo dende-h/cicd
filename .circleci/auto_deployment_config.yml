@@ -50,7 +50,7 @@ jobs:
           name: Terraform Apply
           command: |
             cd ./terraform/environments/development
-            terraform init -backend-config="bucket=${TF_VAR_tfstate_storage}"
+            terraform init -backend-config="bucket=${TFSTATE_STORAGE}"
             terraform apply -auto-approve 
             # Terraformのアウトプットを取得
             mkdir -p /tmp/workspace
