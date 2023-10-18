@@ -36,11 +36,28 @@ jobs:
             terraform plan -out=plan-output.tfplan
             mkdir -p /tmp/workspace
             terraform show -json plan-output.tfplan > /tmp/workspace/plan-output.json
-            cat /tmp/workspace/plan-output.json
       - persist_to_workspace:
           root: /tmp/workspace
           paths: 
             - plan-output.json
+
+  diff-check:
+    executor: terraform
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      - run:
+          name: Check for Changes
+          command: |
+            changes=$(jq '.resource_changes | length' /tmp/workspace/plan-output.json)
+            if [ "$changes" -eq "0" ]; then
+              echo "No changes detected. Exiting."
+              circleci-agent step halt
+            fi
 
   apply:
     executor: terraform
