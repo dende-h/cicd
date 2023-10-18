@@ -35,12 +35,12 @@ jobs:
             terraform init -backend-config="bucket=${TFSTATE_STORAGE}"
             terraform plan -out=plan-output.tfplan
             mkdir -p /tmp/workspace
-            echo plan-output.tfplan
             terraform show -json plan-output.tfplan > /tmp/workspace/plan-output.json
+            cat /tmp/workspace/plan-output.json
       - persist_to_workspace:
           root: /tmp/workspace
           paths: 
-            - terraform-plan-outputs.json
+            - plan-outputs.json
 
   apply:
     executor: terraform
