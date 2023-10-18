@@ -32,7 +32,7 @@ jobs:
           name: Terraform Plan
           command: |
             cd ./terraform/environments/development
-            terraform init -backend-config="bucket=${TF_VAR_tfstate_storage}"
+            terraform init -backend-config="bucket=${TFSTATE_STORAGE}"
             terraform plan -out=plan-output.tfplan
             mkdir -p /tmp/workspace
             echo plan-output.tfplan
