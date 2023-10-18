@@ -14,25 +14,33 @@ workflows:
     jobs:
       # the path-filtering/filter job determines which pipeline
       - path-filtering/filter:
-          name: check-updated-files
+          name: merge-updated-files
           # 3-column, whitespace-delimited mapping. One mapping per
           # line:
           # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
           mapping: |
-            ServerSpec/.* run-serverspec true
             .circleci/.* run-circleci true
-            ansible/.* run-ansible true
-            terraform/environments/development/.* run-development-terraform-build true
-            terraform/modules/.* run-modules-terraform-build true
-            destroy/.* run-terraform-destroy true
-            ^((?!terraform/).)*$ run-raisetech-sample-config true
+            terraform/.* run-development-terraform-build true
           base-revision: main
           # this is the path of the configuration we should trigger once
           # path filtering and pipeline parameter value updates are
           # complete. In this case, we are using the parent dynamic
           # configuration itself.
           config-path: .circleci/auto_deployment_config.yml
-
-      
+          filters:
+            branches:
+              only:
+                - main
+      - path-filtering/filter:
+          name: check-updated-files
+          mapping: |
+            .circleci/.* run-circleci true
+          base-revision: dev # 自身のブランチ名に変更してください。
+          config-path: .circleci/auto_deployment_config.yml
+          filters:
+            branches:
+              only:
+                 # 自身のブランチ名に変更してください。
+                - dev
 
 

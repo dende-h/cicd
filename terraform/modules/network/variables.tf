@@ -46,13 +46,13 @@ variable "public_subnet2_name" {
   default     = "terraform-public-subnet2"
 }
 
-variable "praivate_subnet_route_table_name1" {
+variable "private_subnet_route_table_name1" {
   description = "Name tag for the praivate subnet route table"
   type        = string
   default     = "terraform-praiavte-RouteTable1"
 }
 
-variable "praivate_subnet_route_table_name2" {
+variable "private_subnet_route_table_name2" {
   description = "Name tag for the praivate subnet route table"
   type        = string
   default     = "terraform-praiavte-RouteTable2"
@@ -70,13 +70,13 @@ variable "private_subnet2_cidr_block" {
   default     = "10.0.0.144/28"
 }
 
-variable "praivate_subnet1_name" {
+variable "private_subnet1_name" {
   description = "Name tag for the private subnet1"
   type        = string
   default     = "terraform-praivate-subnet1"
 }
 
-variable "praivate_subnet2_name" {
+variable "private_subnet2_name" {
   description = "Name tag for the private subnet2"
   type        = string
   default     = "terraform-praivate-subnet2"

@@ -8,24 +8,12 @@ parameters:
   run-development-terraform-build:
     type: boolean
     default: false
-  run-modules-terraform-build:
-    type: boolean
-    default: false
-  run-ansible:
-    type: boolean
-    default: false
-  run-raisetech-sample-config:
-    type: boolean
-    default: false  
   run-circleci: 
-    type: boolean
-    default: false 
-  run-serverspec:
     type: boolean
     default: false 
   run-terraform-destroy:
     type: boolean
-    default: false
+    default: false #ここをtrueに変更後にPushするとterraform destroyを実施するジョブが走ります。
 executors:
   terraform:
     docker:
@@ -44,8 +32,34 @@ jobs:
           name: Terraform Plan
           command: |
             cd ./terraform/environments/development
-            terraform init
-            terraform plan 
+            terraform init -backend-config="bucket=${TFSTATE_STORAGE}"
+            terraform plan -out=plan-output.tfplan
+            mkdir -p /tmp/workspace
+            terraform show -json plan-output.tfplan > /tmp/workspace/plan-output.json
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths: 
+            - plan-output.json
+
+  diff-check:
+    executor: ansible
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install jq
+          command: sudo apt-get update && sudo apt-get install -y jq
+      - run:
+          name: Check for Changes
+          command: |
+            changes=$(jq '.resource_changes | length' /tmp/plan-output.json)
+            if [ "$changes" -eq "0" ]; then
+              echo "No changes detected. Exiting."
+              circleci-agent step halt
+            fi
+      - run:
+          command: echo "Resource changes exist."
 
   apply:
     executor: terraform
@@ -55,7 +69,7 @@ jobs:
           name: Terraform Apply
           command: |
             cd ./terraform/environments/development
-            terraform init
+            terraform init -backend-config="bucket=${TFSTATE_STORAGE}"
             terraform apply -auto-approve 
             # Terraformのアウトプットを取得
             mkdir -p /tmp/workspace
@@ -168,15 +182,15 @@ jobs:
           playbook-options: <<parameters.playbook-options>>
           playbook: <<parameters.playbook>>
 
-  cfn-lint:
-    executor: python/default
-    steps:
-      - checkout
-      - run: pip install cfn-lint
-      - run:
-          name: run cfn-lint
-          command: |
-            cfn-lint -i W3002 -t cloudformation/*.yml
+  # cfn-lint:
+  #   executor: python/default
+  #   steps:
+  #     - checkout
+  #     - run: pip install cfn-lint
+  #     - run:
+  #         name: run cfn-lint
+  #         command: |
+  #           cfn-lint -i W3002 -t cloudformation/*.yml
 
   # server-test
   server_spec:
@@ -212,39 +226,80 @@ jobs:
 
 
 workflows:
-  # when pipeline parameter, run-development-terraform-build is true, the
-  # job is triggered.
+  # devブランチでdestroyパラメータがfalseかつ、terraformかCircleCIの設定ファイルに変更が合った時に走るワークフロー
+  terraform-plan:
+    when: 
+      and:
+        - not: <<pipeline.parameters.run-terraform-destroy>>
+        - or: [<< pipeline.parameters.run-development-terraform-build >>,<< pipeline.parameters.run-circleci >>]
+    jobs:
+      - plan: 
+          filters:  
+            branches:
+              only:
+                - dev
+      - diff-check:
+          requires:
+            - plan
+          filters:  
+            branches:
+              only:
+                - dev    
+  # mainブランチでdestroyパラメータがfalseかつ、terraformかCircleCIの設定ファイルに変更が合った時に走るワークフロー
   terraform-build-and-deploy:
     when: 
-      or: [<< pipeline.parameters.run-development-terraform-build >>, << pipeline.parameters.run-modules-terraform-build >>,<< pipeline.parameters.run-ansible >>,<< pipeline.parameters.run-circleci >>,<< pipeline.parameters.run-serverspec >>]
+      and:
+        - not: <<pipeline.parameters.run-terraform-destroy>>
+        - or: [<< pipeline.parameters.run-development-terraform-build >>,<< pipeline.parameters.run-circleci >>]
     jobs:
-      - plan          
+      - plan: 
+          filters:  
+            branches:
+              only:
+                - main        
       - apply:
           requires:
             - plan
+          filters:  
+            branches:
+              only:
+                - main
       - ansible-playbook:
           version: "2.10.7"
           playbook-options: '-i ./ansible/inventories/development/hosts'
           playbook:  ./ansible/playbooks/ec2_deploy.yml
           requires:
             - apply
+          filters:   
+            branches:
+              only:
+                - main
       - sample-app-deploy:
           version: "2.10.7"
           playbook-options: '-i ./ansible/inventories/development/hosts'
           playbook:  ./ansible/playbooks/ec2_deploy2.yml
           requires:
             - ansible-playbook
+          filters:   
+            branches:
+              only:
+                - main
       - server_spec:
           requires:
             - sample-app-deploy
+          filters:   
+            branches:
+              only:
+                - main
 
-  # when pipeline parameter, run-raisetech-sample-config is true, the
-  # job is triggered.
-  sample-jobs:
-    when: << pipeline.parameters.run-raisetech-sample-config >>
-    jobs:
-      - cfn-lint
+  # # when pipeline parameter, run-raisetech-sample-config is true, the
+  # # job is triggered.
+  # sample-jobs:
+  #   when: << pipeline.parameters.run-raisetech-sample-config >>
+  #   jobs:
+  #     - cfn-lint
   
+  # destroyのパラメータをtrueにすると走るパラメータ
   terraform-destroy:
     when: << pipeline.parameters.run-terraform-destroy >>
     jobs:

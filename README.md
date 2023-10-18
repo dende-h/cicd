@@ -1,6 +1,6 @@
 # RaiseTech課題用リポジトリ
 このリポジトリは**RaiseTechのAWSフルコースの提出課題用**に作成されました。
-lecture.mdファイルは課題を通して学んだことの証跡となります。
+```lecture.md```ファイルは課題を通して学んだことの証跡となります。
 
 ## 目次
 - [取り組み内容](#取り組み内容)
@@ -9,12 +9,12 @@ lecture.mdファイルは課題を通して学んだことの証跡となりま�
 - [RaiseTechの課題について](#raisetechの課題について)
 
 ## 取り組み内容
-取り組みは主に下記の5つになります。
-- AWSのVPC、EC2、RDSなどを使った基本的なクラウドインフラ環境の手動構築
-- 構築した環境へRailsアプリをデプロイ(アプリは作成済みのサンプルを使用)
-- 同じ環境をCloudfomationによる自動構築
-- ServerSpecでインフラ環境の自動テスト
-- CircleCIやAnsibleを使って、構築、環境セットアップ、サーバーテストを自動化したCI/CD環境の構築
+取り組みは主に**下記の5つ**になります。
+- **AWS**のVPC、EC2、RDSなどを使った基本的なクラウドインフラ環境の手動構築
+- 構築した環境へ**Railsアプリをデプロイ**(アプリは作成済みのサンプルを使用)
+- 同じ環境を**Cloudfomation**による自動構築
+- **ServerSpec**でインフラ環境の自動テスト
+- **CircleCI**や**Ansible**を使って、構築、環境セットアップ、サーバーテストを自動化したCI/CD環境の構築
 
 ## 成果物
 ### 手動構築とRailsアプリのデプロイ
@@ -55,9 +55,9 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 ## How to use
 下記の手順で環境の構築とアプリのデプロイを行うことができます。  
 **前提条件**
-- CircleCIのアカウントを持っていること 
-- CircleCIのアカウントと紐付けられる自身のGitHubアカウントを持っていること
-- AWSのアカウントを持っており、手動でリソースの構築ができること
+- [CircleCI](https://circleci.com/ja/)のアカウントを持っていること 
+- [CircleCI](https://circleci.com/ja/)のアカウントと紐付けられる自身の[GitHub](https://github.com/)アカウントを持っていること
+- [AWS](https://aws.amazon.com/jp/)のアカウントを持っており、手動でリソースの構築ができること
     - 今回の手順ではEC2キーペアとS3Bucketの手動構築が必要
   
 **設定手順**
@@ -66,22 +66,44 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 3. [AWSのコンソールでS3bucket(terraformの状態を管理するbucketを作成)](#3-awsのコンソールでs3bucketterraformの状態を管理するbucketを作成)
 4. [terraformに許可する権限を持ったIAMユーザーのアクセスキーとシークレットキーを作成](#4-terraformに許可する権限を持ったiamユーザーのアクセスキーとシークレットキーを作成)
 5. [CircleCIに必要な環境変数を登録する](#5-circleciに必要な環境変数を登録する)
-6. [terraformの変数を自身の環境用にオーバーライドする](#6-terraformの変数を自身の環境用にオーバーライドする)
+6. [tfstate管理のS3bucketの指定と、terraformの変数を自身の環境用にオーバーライド](#6-tfstate管理のs3bucketの指定とterraformの変数を自身の環境用にオーバーライド)
 7. [変更をコミットしGitHubにPushする](#7-変更をコミットしgithubにpushする)   
+8. [mainブランチにmergeする](#8-mainブランチにmergeする)
+9. [構築したリソースの削除](#9-構築したリソースの削除)
   
 ##### 1. このリポジトリを自身のリポジトリにフォークして、CircleCIにセットアップする
 - このリポジトリを下記のボタンから自身のリポジトリにForkします。  
     ![fork](/images/readme/fork.png)  
   
-- Forkしたリポジトリを自身のローカル環境にCloneして変更してください。  
+- Forkしたリポジトリを自身のローカル環境にCloneしてください。  
     ![clone](/images/readme/clone.png)  
+
+- ```git switch -c [your branch name]```でブランチを切って下記を編集して作業してください。
+    ```.circleci/config.yml```の下記の箇所を自身のブランチ名に書き換えて下さい。
+    ```yaml
+    - path-filtering/filter:
+          name: merge-updated-files
+          mapping: |
+            .circleci/.* run-circleci true
+          base-revision: dev  # 自身のブランチ名に変更してください。
+          config-path: .circleci/auto_deployment_config.yml
+          filters:
+            branches:
+              only:
+                # 自身のブランチ名に変更してください。
+                - dev　
+                
+    ```  
+      
+    もしブランチ名を```dev```にしてそのまま使う場合はコメント消してファイルに変更かけてください。  
+    もしくは後述で出てくるterraformの変数をオーバーライドする場合はこのファイルに変更がなくても大丈夫です。  
   
 - VScodeを使用する場合下記の拡張機能をインストールして有効化してください。  
     ![yaml](/images/readme/yaml.png)  
     ![terraform](/images/readme/terraform.png)  
   
 - CircleCIのSetup Projectからこのプロジェクトをセットアップする  
-  project settings →　Advanced → Enable dynamic config using setup workflowsの設定をONにしておいてください。  
+  project **settings →　Advanced → Enable dynamic config using setup workflows**の設定を**ON**にしておいてください。  
   ![setting](/images/readme/project_settings.png)  
   ![dynamic_config](/images/readme/dynamic_config_sw.png) 
   
@@ -90,7 +112,7 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 既存のものを使用する場合はこの手順は不要です。  
 [ドキュメント](https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair)にしたがってキーペアを作成してください。
 ##### 3. AWSのコンソールでS3bucket(terraformの状態を管理するbucketを作成)
-このプロジェクトでは構築したterraformのリソースの状態をAmazonS3に保存します。  
+このプロジェクトでは構築した**terraformのリソースの状態をAmazonS3に保存**します。  
 その保存のためのS3bucketを構築します。  
 [ドキュメント](https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/creating-bucket.html)にしたがってS3を作成してください。  
 名前とリージョン以外はdefault値でも大丈夫です。  
@@ -102,10 +124,10 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 削除前提で試すだけなら、```AdministratorAccess```でも大丈夫です。  
 アクセスキーとシークレットキーの漏洩に注意して下さい。
 ##### 5. CircleCIに必要な環境変数を登録する
-CircleCIのProjectSettingsに必要な環境変数を登録します。  
+CircleCIの**ProjectSettings**に必要な環境変数を登録します。  
 ![project_settings](/images/readme/project_settings.png)  
   
-ProjectSetteingsからSSH Keys → Addtional SSH keys → Add SSH keyへ進んで2の手順でローカルに保存した秘密鍵の中身をコピーして追加します。
+**ProjectSetteings**から**SSH Keys → Addtional SSH keys → Add SSH key**へ進んで手順2でローカルに保存した秘密鍵の中身をコピーして追加します。
 ![add_btn](/images/readme/add_ssh_btn.png)  
 ![add_key](/images/readme/add_ssh_key.png)  
   
@@ -113,21 +135,22 @@ ProjectSetteingsからSSH Keys → Addtional SSH keys → Add SSH keyへ進ん�
 秘密鍵の文字列は下記のように全文をコピーして貼り付けてください。  
 ホスト名はblankでも大丈夫です。  
 ```
------BEGIN OPENSSH PRIVATE KEY-----
+  -----BEGIN OPENSSH PRIVATE KEY-----
 
-ssh key strings
+  ssh key strings
 
------END OPENSSH PRIVATE KEY-----
+  -----END OPENSSH PRIVATE KEY-----
 ```
+
 登録後の画面で表示されるFingerPrintをコピーしておいてください。  
 ![finger_print](/images/readme/finger_print.png)
   
   
-続いて同じprojectSettingsからEnvironment Variables → Add Environment Variableから環境変数を追加していきます  
-下図のように4つの変数を登録します  
+続いて同じ**projectSettings**から**Environment Variables → Add Environment Variable**から環境変数を追加していきます  
+下図のように7つの変数を登録します  
 ![add_env_var](/images/readme/add_env_var.png)  
   
-  ```
+```
 AWS_ACCESS_KEY_ID
     手順4で作成したAWSのIAMユーザーのアクセスキーを登録します
 
@@ -139,9 +162,27 @@ KEY_FINGERPRINT
 
 TF_VAR_rds_password	
     構築するRDS/MySQLのパスワードを登録します。
-  ```
-##### 6. terraformの変数を自身の環境用にオーバーライドする
-下記の```/teraform/environments/development/main.tf```の変数を一部自身の環境に合わせて変更してください。
+
+TF_VAR_keypair_name 
+    ssh接続するための秘密鍵のファイル名を登録します
+
+※下記の二つはどちらもS3Bucketの名前ですが同じ名前の指定はできません。
+※S3bucketはグローバルで一意な名前である必要があり、既存で同盟のBucketが存在する場合は構築が失敗します
+
+TF_VAR_s3_bucket_name
+    appのストレージとなるS3Bucketの名前を登録します
+
+TFSTATE_STORAGE
+    tfstateを保存するために手順3で作成したS3Bucketの名前を登録します
+```  
+
+  
+##### 6. terraformの変数を自身の環境用にオーバーライド(必要があれば)
+下記の```/terraform/environments/development/main.tf```の変数を指定することでオーバーライドできます。  
+オーバーライドしない場合default値で動作します。  
+my_ipを自身のローカルIPに変更して頂くのがよりセキュアでおすすめです。  
+```[0.0.0.0/0] → [<your local ip>/32]```  
+
 ```hcl
 provider "aws" {
   # リージョンを自身の利用しているものに設定してください
@@ -159,12 +200,12 @@ module "network" {
   # public_subnet2_cidr_block = "10.0.0.16/28"
   # public_subnet1_name = "terraform-public-subnet1"
   # public_subnet2_name = "terraform-public-subnet2"
-  # praivate_subnet_route_table_name1 = "terraform-praiavte-RouteTable1"
-  # praivate_subnet_route_table_name2 = "terraform-praiavte-RouteTable2"
+  # private_subnet_route_table_name1 = "terraform-praiavte-RouteTable1"
+  # private_subnet_route_table_name2 = "terraform-praiavte-RouteTable2"
   # private_subnet1_cidr_block =  "10.0.0.128/28"
   # private_subnet2_cidr_block = "10.0.0.144/28"
-  # praivate_subnet1_name = "terraform-praivate-subnet1"
-  # praivate_subnet2_name = "terraform-praivate-subnet2"
+  # private_subnet1_name = "terraform-praivate-subnet1"
+  # private_subnet2_name = "terraform-praivate-subnet2"
   # aws_region = "ap-northeast-1"
   # vpc_endpoint_name = "terraform_vpc_endpoint"
 }
@@ -172,8 +213,11 @@ module "network" {
 module "security" {
   source = "../../modules/security"
   vpc_id = module.network.vpc_id
-# 必要に応じて変数をオーバーライドしてください
+
+# EC2のSSH接続を許可するIPアドレスを絞る場合は下記を変更してください。
   my_ip = ["0.0.0.0/0"] #指定したIPアドレス以外からの通信をブロックするように設定。自身のローカルPCのIPを指定するとセキュアです。
+
+# 必要に応じて変数をオーバーライドしてください
   # alb_sec_group_name = "alb-sec-terraform"
   # alb_sec_group_description = "security for alb access"
   # ec2_sec_group_name = "ec2-sec-terraform"
@@ -194,6 +238,7 @@ module "load_balancer" {
   alb_sec_group_id  = module.security.alb_sec_group_id
   port              = module.security.alb_ingress_port
   target_ec2        = module.compute.ec2_instance_id
+
 # 必要に応じて変数をオーバーライドしてください
   # alb_name = "terraform-alb"
   # alb_target = "terraform-alb-target"
@@ -202,19 +247,17 @@ module "load_balancer" {
 module "compute" {
   source            = "../../modules/compute"
   ec2_subnet1       = module.network.public_subnet1_id
-  sec_group_for_ec2 = [module.security.ec2_sec_group_id]
+  sec_group_for_ec2 = [module.security.ec2_sec_group_id] 
+  keypair_name = var.keypair_name #環境変数から取得している
+
 # 必要に応じて変数をオーバーライドしてください
+# 下記はdefault値です。
   # role_name = "terraform-ec2-IamRole"
   # policy_arns =  ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
   # profile_name = "terraform-ec2-instance-profile"
   # instance_type = "t2.micro"
   # ami = "ami-07d6bd9a28134d3b3"
-
-
-#事前に作成したキーペア名を指定してください。キーペアが存在しない場合失敗します。
-  keypair_name = <<"your-key-pair-name">> 
-
-
+  
   # volume_type = "gp2"
   # volume_size = 8
   # ec2_name = "terraform-ec2"
@@ -222,12 +265,14 @@ module "compute" {
 
 module "database" {
   source                     = "../../modules/database"
-  subnet_ids                 = module.network.praivate_subnet_ids
+  subnet_ids                 = module.network.private_subnet_ids
   rds_vpc_security_group_ids = [module.security.rds_sec_group_id]
-# 必要に応じて変数をオーバーライドしてください
+  rds_password = var.rds_password #環境変数から取得している
+# 必要に応じて変数をオーバーライドしてください。
+# 下記はdefault値です。
   # subnet_group_name = "terraform-subnet-group"
   # rds_allocated_storage = 20
-  # rads_storage_type = "gp2"
+  # rds_storage_type = "gp2"
   # rds_engine = "mysql"
   # rds_engine_version = "8.0.33"
   # rds_instance_class = "db.t3.micro"
@@ -239,25 +284,35 @@ module "database" {
 
 module "storage" {
   source = "../../modules/storage"
-
-
-# s3バケット名を自身で決めた名前に上書きしてください。既に存在する名前の場合失敗します。
-  s3_bucket_name = << "your-s3-bucket-name" >>
-
-
-}  
-
-
+  # グローバルで一意な名前かつ命名規則に従っていない場合失敗します。
+  s3_bucket_name = var.s3_bucket_name #環境変数から取得している
+}
 ```
-```keypair_name```と```s3_bucket_name```の二つは変更必須です。  
-  
-
-
-
 
 ##### 7. 変更をコミットしGitHubにPushする 
 手順6の変更を保存したら、commitをリモートリポジトリにpushします。
-CircleCIのダッシュボードで```terraform-build-and-deploy```ワークフローが起動したか確認してください。
+CircleCIのダッシュボードで```terraform-plan```ワークフローが起動したか確認してください。
+
+##### 8. mainブランチにmergeする
+```terraform-plan```ワークフローが成功しているのを確認し、変更をmainブランチにmergeするとデプロイが始まります。
+初回の構築では20分程はかかるかと思います。
+
+##### 9. 構築したリソースの削除
+削除する際は```/.circleci/auto_deployment_config```内の```run-terraform-destroy```パラメータをtrueに書き換えてください。
+```yaml
+parameters:
+  run-development-terraform-build:
+    type: boolean
+    default: false
+  run-circleci: 
+    type: boolean
+    default: false 
+  run-terraform-destroy:
+    type: boolean
+    default: false #ここをtrueに変更後にPushするとterraform destroyを実施するジョブが走ります。
+```
+この状態で変更をPushするとterraform -destroyが走りリソースが削除されます。
+※S3bucket内にデータがあると削除が失敗します。その際は手動で削除してください。
 
 ## Raisetechの課題について
 ##### Raisetechの課題は下記の原則のもと進めていきます

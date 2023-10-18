@@ -17,7 +17,7 @@ resource "aws_db_subnet_group" "terraform_rds_subnet_group" {
 # Create RDS
 resource "aws_db_instance" "terraform_rds" {
   allocated_storage           = var.rds_allocated_storage
-  storage_type                = var.rads_storage_type
+  storage_type                = var.rds_storage_type
   engine                      = var.rds_engine
   engine_version              = var.rds_engine_version
   instance_class              = var.rds_instance_class

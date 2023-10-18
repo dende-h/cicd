@@ -1,2 +1,0 @@
-このファイルに変更をかけてプッシュするとCircleCIでTerraform destroyのジョブが起動します。
-
