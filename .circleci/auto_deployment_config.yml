@@ -13,7 +13,7 @@ parameters:
     default: false 
   run-terraform-destroy:
     type: boolean
-    default: false #ここをtrueに変更後にPushするとterraform destroyを実施するジョブが走ります。
+    default: true #ここをtrueに変更後にPushするとterraform destroyを実施するジョブが走ります。
 executors:
   terraform:
     docker:
