@@ -36,7 +36,7 @@ jobs:
             terraform plan -out=plan-output.tfplan
             mkdir -p /tmp/workspace
             echo plan-output.tfplan
-            terraform show -json plan-output.tfplan > /tmp/workspaceplan-output.json
+            terraform show -json plan-output.tfplan > /tmp/workspace/plan-output.json
       - persist_to_workspace:
           root: /tmp/workspace
           paths: 
@@ -216,24 +216,24 @@ workflows:
         - or: [<< pipeline.parameters.run-development-terraform-build >>,<< pipeline.parameters.run-circleci >>]
     jobs:
       - plan          
-      - apply:
-          requires:
-            - plan
-      - ansible-playbook:
-          version: "2.10.7"
-          playbook-options: '-i ./ansible/inventories/development/hosts'
-          playbook:  ./ansible/playbooks/ec2_deploy.yml
-          requires:
-            - apply
-      - sample-app-deploy:
-          version: "2.10.7"
-          playbook-options: '-i ./ansible/inventories/development/hosts'
-          playbook:  ./ansible/playbooks/ec2_deploy2.yml
-          requires:
-            - ansible-playbook
-      - server_spec:
-          requires:
-            - sample-app-deploy
+      # - apply:
+      #     requires:
+      #       - plan
+      # - ansible-playbook:
+      #     version: "2.10.7"
+      #     playbook-options: '-i ./ansible/inventories/development/hosts'
+      #     playbook:  ./ansible/playbooks/ec2_deploy.yml
+      #     requires:
+      #       - apply
+      # - sample-app-deploy:
+      #     version: "2.10.7"
+      #     playbook-options: '-i ./ansible/inventories/development/hosts'
+      #     playbook:  ./ansible/playbooks/ec2_deploy2.yml
+      #     requires:
+      #       - ansible-playbook
+      # - server_spec:
+      #     requires:
+      #       - sample-app-deploy
 
   # # when pipeline parameter, run-raisetech-sample-config is true, the
   # # job is triggered.
