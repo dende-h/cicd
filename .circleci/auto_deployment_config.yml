@@ -40,7 +40,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/workspace
           paths: 
-            - plan-outputs.json
+            - plan-output.json
 
   apply:
     executor: terraform
