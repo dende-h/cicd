@@ -130,7 +130,7 @@ CircleCIの**ProjectSettings**に必要な環境変数を登録します。
   
   
 続いて同じ**projectSettings**から**Environment Variables → Add Environment Variable**から環境変数を追加していきます  
-下図のように6つの変数を登録します  
+下図のように7つの変数を登録します  
 ![add_env_var](/images/readme/add_env_var.png)  
   
 ```
